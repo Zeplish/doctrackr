@@ -6,7 +6,7 @@ import { eq, and, desc, count, sql } from "drizzle-orm";
 
 const router = Router();
 
-router.get("/email-logs", async (req, res) => {
+router.get("/email-logs", async (req, res): Promise<void> => {
   try {
     const parsed = ListEmailLogsQueryParams.safeParse(req.query);
     const params = parsed.success ? parsed.data : {};

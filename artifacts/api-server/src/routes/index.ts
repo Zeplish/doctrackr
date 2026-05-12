@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { requireAuth } from "../middlewares/auth";
 import healthRouter from "./health";
 import organizationRouter from "./organization";
 import smtpRouter from "./smtp";
@@ -13,6 +14,7 @@ import dashboardRouter from "./dashboard";
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(requireAuth);
 router.use(organizationRouter);
 router.use(smtpRouter);
 router.use(reminderSettingsRouter);

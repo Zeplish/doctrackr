@@ -6,7 +6,7 @@ import { eq, and, count } from "drizzle-orm";
 
 const router = Router();
 
-router.get("/document-types", async (req, res) => {
+router.get("/document-types", async (req, res): Promise<void> => {
   try {
     const parsed = ListDocumentTypesQueryParams.safeParse(req.query);
     const params = parsed.success ? parsed.data : {};
@@ -38,11 +38,11 @@ router.get("/document-types", async (req, res) => {
   }
 });
 
-router.post("/document-types", async (req, res) => {
+router.post("/document-types", async (req, res): Promise<void> => {
   try {
     const parsed = CreateDocumentTypeBody.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid input", details: parsed.error.issues });
-    const [dt] = await db.insert(documentTypesTable).values(parsed.data).returning();
+    if (!parsed.success) { res.status(400).json({ error: "Invalid input", details: parsed.error.issues }); return; }
+    const [dt] = await db.insert(documentTypesTable).values(parsed.data!).returning();
     res.status(201).json({ ...dt, usageCount: 0 });
   } catch (err) {
     req.log.error(err);
@@ -50,12 +50,12 @@ router.post("/document-types", async (req, res) => {
   }
 });
 
-router.get("/document-types/:id", async (req, res) => {
+router.get("/document-types/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
     const [dt] = await db.select().from(documentTypesTable).where(eq(documentTypesTable.id, id));
-    if (!dt) return res.status(404).json({ error: "Document type not found" });
+    if (!dt) res.status(404).json({ error: "Document type not found" }); return;
     const [usage] = await db.select({ count: count() }).from(checklistItemsTable).where(eq(checklistItemsTable.documentTypeId, id));
     res.json({ ...dt, usageCount: usage?.count ?? 0 });
   } catch (err) {
@@ -64,17 +64,17 @@ router.get("/document-types/:id", async (req, res) => {
   }
 });
 
-router.put("/document-types/:id", async (req, res) => {
+router.put("/document-types/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
     const parsed = UpdateDocumentTypeBody.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
+    if (!parsed.success) res.status(400).json({ error: "Invalid input" }); return;
     const [updated] = await db.update(documentTypesTable)
       .set({ ...parsed.data, updatedAt: new Date() })
       .where(eq(documentTypesTable.id, id))
       .returning();
-    if (!updated) return res.status(404).json({ error: "Document type not found" });
+    if (!updated) res.status(404).json({ error: "Document type not found" }); return;
     const [usage] = await db.select({ count: count() }).from(checklistItemsTable).where(eq(checklistItemsTable.documentTypeId, id));
     res.json({ ...updated, usageCount: usage?.count ?? 0 });
   } catch (err) {
@@ -83,16 +83,17 @@ router.put("/document-types/:id", async (req, res) => {
   }
 });
 
-router.delete("/document-types/:id", async (req, res) => {
+router.delete("/document-types/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
     const [usage] = await db.select({ count: count() }).from(checklistItemsTable).where(eq(checklistItemsTable.documentTypeId, id));
     if (usage && usage.count > 0) {
-      return res.json({
+      res.json({
         success: false,
         message: `This document type is being used in ${usage.count} records and cannot be deleted. Please deactivate it instead.`,
       });
+      return;
     }
     await db.delete(documentTypesTable).where(eq(documentTypesTable.id, id));
     res.json({ success: true, message: "Document type deleted" });
@@ -102,12 +103,12 @@ router.delete("/document-types/:id", async (req, res) => {
   }
 });
 
-router.patch("/document-types/:id/toggle-active", async (req, res) => {
+router.patch("/document-types/:id/toggle-active", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
     const [dt] = await db.select().from(documentTypesTable).where(eq(documentTypesTable.id, id));
-    if (!dt) return res.status(404).json({ error: "Document type not found" });
+    if (!dt) res.status(404).json({ error: "Document type not found" }); return;
     const [updated] = await db.update(documentTypesTable)
       .set({ isActive: !dt.isActive, updatedAt: new Date() })
       .where(eq(documentTypesTable.id, id))

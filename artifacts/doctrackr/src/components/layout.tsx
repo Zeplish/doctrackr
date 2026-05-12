@@ -10,7 +10,6 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { UserButton } from "@clerk/react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard,
@@ -23,14 +22,25 @@ import {
   Server,
   Bell,
   Settings,
-  ChevronRight
+  ChevronRight,
+  LogOut,
 } from "lucide-react";
 import { ReactNode } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { useLogout } from "@/lib/auth";
+import { useLocation as useWouterLocation } from "wouter";
 
 export function Layout({ children, title }: { children: ReactNode; title: string }) {
   const [location] = useLocation();
+  const [, setLocation] = useWouterLocation();
   const isSettingsActive = location.startsWith("/settings");
+  const logout = useLogout();
+
+  const handleLogout = async () => {
+    await logout.mutateAsync();
+    setLocation("/login");
+  };
 
   return (
     <SidebarProvider>
@@ -131,6 +141,18 @@ export function Layout({ children, title }: { children: ReactNode; title: string
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
+        <div className="mt-auto p-3 border-t border-sidebar-border/50">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2 text-white/70 hover:text-white hover:bg-white/10"
+            onClick={handleLogout}
+            disabled={logout.isPending}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
+        </div>
       </Sidebar>
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center justify-between border-b px-4 lg:px-8 bg-card text-card-foreground">
@@ -138,7 +160,6 @@ export function Layout({ children, title }: { children: ReactNode; title: string
             <SidebarTrigger className="-ml-2" />
             <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
           </div>
-          <UserButton />
         </header>
         <main className="flex-1 overflow-auto p-4 lg:p-8 bg-muted/20">
           {children}

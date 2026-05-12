@@ -39,7 +39,7 @@ async function buildChecklistItem(item: Record<string, unknown>, student: Record
   };
 }
 
-router.get("/checklist", async (req, res) => {
+router.get("/checklist", async (req, res): Promise<void> => {
   try {
     const parsed = ListChecklistItemsQueryParams.safeParse(req.query);
     const params = parsed.success ? parsed.data : {};
@@ -83,10 +83,10 @@ router.get("/checklist", async (req, res) => {
   }
 });
 
-router.get("/checklist/:id", async (req, res) => {
+router.get("/checklist/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
     const [row] = await db
       .select({ item: checklistItemsTable, docType: documentTypesTable, student: studentsTable, employee: employeesTable })
       .from(checklistItemsTable)
@@ -94,7 +94,7 @@ router.get("/checklist/:id", async (req, res) => {
       .leftJoin(studentsTable, eq(checklistItemsTable.studentId, studentsTable.id))
       .leftJoin(employeesTable, eq(checklistItemsTable.employeeId, employeesTable.id))
       .where(eq(checklistItemsTable.id, id));
-    if (!row) return res.status(404).json({ error: "Checklist item not found" });
+    if (!row) res.status(404).json({ error: "Checklist item not found" }); return;
     const item = await buildChecklistItem(row.item as unknown as Record<string, unknown>, row.student as unknown as Record<string, unknown> | null, row.employee as unknown as Record<string, unknown> | null, row.docType as unknown as Record<string, unknown>);
     res.json(item);
   } catch (err) {
@@ -103,17 +103,17 @@ router.get("/checklist/:id", async (req, res) => {
   }
 });
 
-router.patch("/checklist/:id", async (req, res) => {
+router.patch("/checklist/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
     const parsed = UpdateChecklistItemBody.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
+    if (!parsed.success) res.status(400).json({ error: "Invalid input" }); return;
     const [updated] = await db.update(checklistItemsTable)
       .set({ ...parsed.data, updatedAt: new Date() })
       .where(eq(checklistItemsTable.id, id))
       .returning();
-    if (!updated) return res.status(404).json({ error: "Checklist item not found" });
+    if (!updated) res.status(404).json({ error: "Checklist item not found" }); return;
     const [row] = await db
       .select({ item: checklistItemsTable, docType: documentTypesTable, student: studentsTable, employee: employeesTable })
       .from(checklistItemsTable)
@@ -129,12 +129,12 @@ router.patch("/checklist/:id", async (req, res) => {
   }
 });
 
-router.patch("/checklist/bulk-update", async (req, res) => {
+router.patch("/checklist/bulk-update", async (req, res): Promise<void> => {
   try {
     const parsed = BulkUpdateChecklistItemsBody.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
+    if (!parsed.success) { res.status(400).json({ error: "Invalid input" }); return; }
     const updated = [];
-    for (const item of parsed.data.items) {
+    for (const item of parsed.data!.items) {
       const [upd] = await db.update(checklistItemsTable)
         .set({ expiryDate: item.expiryDate, notes: item.notes, updatedAt: new Date() })
         .where(eq(checklistItemsTable.id, item.id))
@@ -159,10 +159,10 @@ router.patch("/checklist/bulk-update", async (req, res) => {
   }
 });
 
-router.post("/checklist/:id/send-reminder", async (req, res) => {
+router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
 
     const [row] = await db
       .select({ item: checklistItemsTable, docType: documentTypesTable, student: studentsTable, employee: employeesTable })
@@ -172,18 +172,18 @@ router.post("/checklist/:id/send-reminder", async (req, res) => {
       .leftJoin(employeesTable, eq(checklistItemsTable.employeeId, employeesTable.id))
       .where(eq(checklistItemsTable.id, id));
 
-    if (!row) return res.status(404).json({ error: "Checklist item not found" });
+    if (!row) res.status(404).json({ error: "Checklist item not found" }); return;
 
     const [org] = await db.select().from(organizationTable).limit(1);
     const [smtp] = await db.select().from(smtpSettingsTable).limit(1);
 
     if (!smtp?.host) {
-      return res.json({ success: false, message: "SMTP not configured. Please configure email settings first." });
+      res.json({ success: false, message: "SMTP not configured. Please configure email settings first." }); return;
     }
 
     const item = row.item;
     const docType = row.docType;
-    const expiryDate = item.expiryDate ? format(parseISO(item.expiryDate), "MMMM d, yyyy") : "N/A";
+    const expiryDate = item.expiryDate ? format(parseISO(item.expiryDate as string), "MMMM d, yyyy") : "N/A";
     const status = computeDocumentStatus(item.expiryDate);
 
     let emailStatus = "sent";
@@ -193,7 +193,7 @@ router.post("/checklist/:id/send-reminder", async (req, res) => {
     try {
       const transporter = await getTransporter();
       if (item.personType === "student" && row.student) {
-        const s = row.student;
+        const s = row.student!;
         const { subject, html } = buildStudentReminderEmail({
           orgName: org?.name ?? "DocTrackr",
           senderName: org?.senderName ?? null,
@@ -208,16 +208,16 @@ router.post("/checklist/:id/send-reminder", async (req, res) => {
           emailFooter: org?.emailFooter ?? null,
           logoUrl: org?.logoUrl ?? null,
         });
-        const to = [s.parent1Email];
-        if (s.parent2Email) to.push(s.parent2Email);
+        const to = [s.parent1Email as string];
+        if (s.parent2Email) to.push(s.parent2Email as string);
         const cc = await sendReminderEmail({ transporter, smtp, org: org ?? { adminCcEmail: null }, to, subject, html });
         ccEmail = cc;
         await db.insert(emailLogsTable).values({
           recipientEmail: to.join(", "),
           ccEmail: ccEmail ?? null,
           personType: "student",
-          personId: s.id,
-          personName: s.fullName,
+          personId: s!.id,
+          personName: s!.fullName,
           checklistItemId: id,
           documentTypeId: docType.id,
           documentTypeName: docType.name,
@@ -226,7 +226,7 @@ router.post("/checklist/:id/send-reminder", async (req, res) => {
           reminderType: "manual",
         });
       } else if (item.personType === "employee" && row.employee) {
-        const e = row.employee;
+        const e = row.employee!;
         const { subject, html } = buildEmployeeReminderEmail({
           orgName: org?.name ?? "DocTrackr",
           senderName: org?.senderName ?? null,
@@ -255,8 +255,8 @@ router.post("/checklist/:id/send-reminder", async (req, res) => {
       }
     } catch (err: unknown) {
       emailStatus = "failed";
-      errorMessage = err instanceof Error ? err.message : "Unknown error";
-      req.log.error(err, "Failed to send reminder email");
+      errorMessage = err instanceof Error ? (err as Error).message : "Unknown error";
+      req.log.error({ err }, "Failed to send reminder email");
     }
 
     await db.update(checklistItemsTable)

@@ -15,7 +15,7 @@ async function ensureOrg() {
   return org;
 }
 
-router.get("/organization", async (req, res) => {
+router.get("/organization", async (req, res): Promise<void> => {
   try {
     const org = await ensureOrg();
     res.json(org);
@@ -25,10 +25,10 @@ router.get("/organization", async (req, res) => {
   }
 });
 
-router.put("/organization", async (req, res) => {
+router.put("/organization", async (req, res): Promise<void> => {
   try {
     const parsed = UpdateOrganizationBody.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
+    if (!parsed.success) res.status(400).json({ error: "Invalid input" }); return;
     const org = await ensureOrg();
     const [updated] = await db.update(organizationTable)
       .set({ ...parsed.data, updatedAt: new Date() })

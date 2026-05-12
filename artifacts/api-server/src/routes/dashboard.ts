@@ -48,7 +48,7 @@ async function buildAllChecklistItems() {
   });
 }
 
-router.get("/dashboard/stats", async (req, res) => {
+router.get("/dashboard/stats", async (req, res): Promise<void> => {
   try {
     const allItems = await buildAllChecklistItems();
     const activeItems = allItems.filter((i) => i.personStatus === "active");
@@ -94,7 +94,7 @@ router.get("/dashboard/stats", async (req, res) => {
   }
 });
 
-router.get("/dashboard/expiring-soon", async (req, res) => {
+router.get("/dashboard/expiring-soon", async (req, res): Promise<void> => {
   try {
     const parsed = GetDashboardExpiringSoonQueryParams.safeParse(req.query);
     const params = parsed.success ? parsed.data : {};
@@ -115,7 +115,7 @@ router.get("/dashboard/expiring-soon", async (req, res) => {
   }
 });
 
-router.get("/dashboard/overdue", async (req, res) => {
+router.get("/dashboard/overdue", async (req, res): Promise<void> => {
   try {
     const parsed = GetDashboardOverdueQueryParams.safeParse(req.query);
     const params = parsed.success ? parsed.data : {};
@@ -136,7 +136,7 @@ router.get("/dashboard/overdue", async (req, res) => {
   }
 });
 
-router.get("/dashboard/missing", async (req, res) => {
+router.get("/dashboard/missing", async (req, res): Promise<void> => {
   try {
     const parsed = GetDashboardMissingQueryParams.safeParse(req.query);
     const params = parsed.success ? parsed.data : {};

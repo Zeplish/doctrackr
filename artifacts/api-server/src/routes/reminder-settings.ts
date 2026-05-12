@@ -15,7 +15,7 @@ async function ensureSettings() {
   return s;
 }
 
-router.get("/reminder-settings", async (req, res) => {
+router.get("/reminder-settings", async (req, res): Promise<void> => {
   try {
     const settings = await ensureSettings();
     res.json(settings);
@@ -25,10 +25,10 @@ router.get("/reminder-settings", async (req, res) => {
   }
 });
 
-router.put("/reminder-settings", async (req, res) => {
+router.put("/reminder-settings", async (req, res): Promise<void> => {
   try {
     const parsed = UpdateReminderSettingsBody.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
+    if (!parsed.success) res.status(400).json({ error: "Invalid input" }); return;
     const settings = await ensureSettings();
     const [updated] = await db.update(reminderSettingsTable)
       .set({ ...parsed.data, updatedAt: new Date() })

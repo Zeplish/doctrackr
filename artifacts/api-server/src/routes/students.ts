@@ -26,7 +26,7 @@ async function createChecklistForStudent(studentId: number) {
   );
 }
 
-router.get("/students", async (req, res) => {
+router.get("/students", async (req, res): Promise<void> => {
   try {
     const parsed = ListStudentsQueryParams.safeParse(req.query);
     const params = parsed.success ? parsed.data : {};
@@ -49,11 +49,11 @@ router.get("/students", async (req, res) => {
   }
 });
 
-router.post("/students", async (req, res) => {
+router.post("/students", async (req, res): Promise<void> => {
   try {
     const parsed = CreateStudentBody.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid input", details: parsed.error.issues });
-    const [student] = await db.insert(studentsTable).values(parsed.data).returning();
+    if (!parsed.success) { res.status(400).json({ error: "Invalid input", details: parsed.error.issues }); return; }
+    const [student] = await db.insert(studentsTable).values(parsed.data!).returning();
     await createChecklistForStudent(student.id);
     res.status(201).json(student);
   } catch (err) {
@@ -62,12 +62,12 @@ router.post("/students", async (req, res) => {
   }
 });
 
-router.get("/students/:id", async (req, res) => {
+router.get("/students/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
     const [student] = await db.select().from(studentsTable).where(eq(studentsTable.id, id));
-    if (!student) return res.status(404).json({ error: "Student not found" });
+    if (!student) res.status(404).json({ error: "Student not found" }); return;
 
     const checklist = await db
       .select({
@@ -113,17 +113,17 @@ router.get("/students/:id", async (req, res) => {
   }
 });
 
-router.put("/students/:id", async (req, res) => {
+router.put("/students/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
     const parsed = UpdateStudentBody.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
+    if (!parsed.success) res.status(400).json({ error: "Invalid input" }); return;
     const [updated] = await db.update(studentsTable)
       .set({ ...parsed.data, updatedAt: new Date() })
       .where(eq(studentsTable.id, id))
       .returning();
-    if (!updated) return res.status(404).json({ error: "Student not found" });
+    if (!updated) res.status(404).json({ error: "Student not found" }); return;
     res.json(updated);
   } catch (err) {
     req.log.error(err);
@@ -131,10 +131,10 @@ router.put("/students/:id", async (req, res) => {
   }
 });
 
-router.delete("/students/:id", async (req, res) => {
+router.delete("/students/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
     await db.delete(studentsTable).where(eq(studentsTable.id, id));
     res.json({ success: true, message: "Student deleted" });
   } catch (err) {
