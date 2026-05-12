@@ -3,20 +3,40 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: DocTrackr API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: organization
+    description: Organization branding and settings
+  - name: smtp
+    description: SMTP email settings
+  - name: reminder-settings
+    description: Reminder schedule settings
+  - name: students
+    description: Student management
+  - name: employees
+    description: Employee management
+  - name: document-types
+    description: Document type management
+  - name: checklist
+    description: Checklist item management
+  - name: email-logs
+    description: Email log history
+  - name: dashboard
+    description: Dashboard stats and summaries
+  - name: reminders
+    description: Send reminders manually
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +44,701 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # Organization
+  /organization:
+    get:
+      operationId: getOrganization
+      tags: [organization]
+      summary: Get organization settings
+      responses:
+        "200":
+          description: Organization settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+    put:
+      operationId: updateOrganization
+      tags: [organization]
+      summary: Update organization settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrganizationInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+
+  # SMTP Settings
+  /smtp-settings:
+    get:
+      operationId: getSmtpSettings
+      tags: [smtp]
+      summary: Get SMTP settings
+      responses:
+        "200":
+          description: SMTP settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmtpSettings"
+    put:
+      operationId: updateSmtpSettings
+      tags: [smtp]
+      summary: Update SMTP settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmtpSettingsInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmtpSettings"
+
+  /smtp-settings/test:
+    post:
+      operationId: testSmtpSettings
+      tags: [smtp]
+      summary: Send test email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestEmailInput"
+      responses:
+        "200":
+          description: Test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  # Reminder Settings
+  /reminder-settings:
+    get:
+      operationId: getReminderSettings
+      tags: [reminder-settings]
+      summary: Get reminder schedule settings
+      responses:
+        "200":
+          description: Reminder settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReminderSettings"
+    put:
+      operationId: updateReminderSettings
+      tags: [reminder-settings]
+      summary: Update reminder schedule settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReminderSettingsInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReminderSettings"
+
+  # Students
+  /students:
+    get:
+      operationId: listStudents
+      tags: [students]
+      summary: List all students
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, all]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+    post:
+      operationId: createStudent
+      tags: [students]
+      summary: Create a new student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+
+  /students/{id}:
+    get:
+      operationId: getStudent
+      tags: [students]
+      summary: Get student by ID with checklist
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Student with checklist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentDetail"
+        "404":
+          description: Not found
+    put:
+      operationId: updateStudent
+      tags: [students]
+      summary: Update student
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+    delete:
+      operationId: deleteStudent
+      tags: [students]
+      summary: Delete student
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  # Employees
+  /employees:
+    get:
+      operationId: listEmployees
+      tags: [employees]
+      summary: List all employees
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, all]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Employee"
+    post:
+      operationId: createEmployee
+      tags: [employees]
+      summary: Create a new employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+
+  /employees/{id}:
+    get:
+      operationId: getEmployee
+      tags: [employees]
+      summary: Get employee by ID with checklist
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Employee with checklist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeDetail"
+        "404":
+          description: Not found
+    put:
+      operationId: updateEmployee
+      tags: [employees]
+      summary: Update employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+    delete:
+      operationId: deleteEmployee
+      tags: [employees]
+      summary: Delete employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  # Document Types
+  /document-types:
+    get:
+      operationId: listDocumentTypes
+      tags: [document-types]
+      summary: List document types
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [student, employee, both, all]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, all]
+      responses:
+        "200":
+          description: List of document types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DocumentType"
+    post:
+      operationId: createDocumentType
+      tags: [document-types]
+      summary: Create document type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentTypeInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentType"
+
+  /document-types/{id}:
+    get:
+      operationId: getDocumentType
+      tags: [document-types]
+      summary: Get document type by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Document type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentType"
+    put:
+      operationId: updateDocumentType
+      tags: [document-types]
+      summary: Update document type
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentTypeInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentType"
+    delete:
+      operationId: deleteDocumentType
+      tags: [document-types]
+      summary: Delete document type (only if unused)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted or blocked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  /document-types/{id}/toggle-active:
+    patch:
+      operationId: toggleDocumentTypeActive
+      tags: [document-types]
+      summary: Activate or deactivate a document type
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentType"
+
+  # Checklist Items
+  /checklist:
+    get:
+      operationId: listChecklistItems
+      tags: [checklist]
+      summary: List all checklist items (compliance view)
+      parameters:
+        - name: personType
+          in: query
+          schema:
+            type: string
+            enum: [student, employee, all]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [missing, valid, expiring_soon, due_today, overdue, all]
+        - name: documentTypeId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: peopleStatus
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, all]
+      responses:
+        "200":
+          description: Checklist items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChecklistItem"
+
+  /checklist/{id}:
+    get:
+      operationId: getChecklistItem
+      tags: [checklist]
+      summary: Get checklist item by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Checklist item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChecklistItem"
+    patch:
+      operationId: updateChecklistItem
+      tags: [checklist]
+      summary: Update checklist item (expiry date, notes)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChecklistItemUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChecklistItem"
+
+  /checklist/bulk-update:
+    patch:
+      operationId: bulkUpdateChecklistItems
+      tags: [checklist]
+      summary: Bulk update multiple checklist items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkChecklistUpdate"
+      responses:
+        "200":
+          description: Updated items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChecklistItem"
+
+  /checklist/{id}/send-reminder:
+    post:
+      operationId: sendManualReminder
+      tags: [reminders]
+      summary: Send manual reminder for a checklist item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  # Email Logs
+  /email-logs:
+    get:
+      operationId: listEmailLogs
+      tags: [email-logs]
+      summary: List email logs
+      parameters:
+        - name: personType
+          in: query
+          schema:
+            type: string
+            enum: [student, employee, all]
+        - name: personId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: checklistItemId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [sent, failed, all]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Email logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailLogPage"
+
+  # Dashboard
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard summary statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/expiring-soon:
+    get:
+      operationId: getDashboardExpiringSoon
+      tags: [dashboard]
+      summary: Get items expiring in next 30 days
+      parameters:
+        - name: personType
+          in: query
+          schema:
+            type: string
+            enum: [student, employee, all]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Expiring items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChecklistItem"
+
+  /dashboard/overdue:
+    get:
+      operationId: getDashboardOverdue
+      tags: [dashboard]
+      summary: Get overdue items
+      parameters:
+        - name: personType
+          in: query
+          schema:
+            type: string
+            enum: [student, employee, all]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Overdue items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChecklistItem"
+
+  /dashboard/missing:
+    get:
+      operationId: getDashboardMissing
+      tags: [dashboard]
+      summary: Get missing document items
+      parameters:
+        - name: personType
+          in: query
+          schema:
+            type: string
+            enum: [student, employee, all]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Missing document items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChecklistItem"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +749,609 @@ components:
       required:
         - status
 
+    ActionResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+
+    Organization:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        senderName:
+          type: ["string", "null"]
+        senderEmail:
+          type: ["string", "null"]
+        emailFooter:
+          type: ["string", "null"]
+        primaryColor:
+          type: ["string", "null"]
+        secondaryColor:
+          type: ["string", "null"]
+        tagline:
+          type: ["string", "null"]
+        adminCcEmail:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - name
+        - createdAt
+        - updatedAt
+
+    OrganizationInput:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        senderName:
+          type: ["string", "null"]
+        senderEmail:
+          type: ["string", "null"]
+        emailFooter:
+          type: ["string", "null"]
+        primaryColor:
+          type: ["string", "null"]
+        secondaryColor:
+          type: ["string", "null"]
+        tagline:
+          type: ["string", "null"]
+        adminCcEmail:
+          type: ["string", "null"]
+      required:
+        - name
+
+    SmtpSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        host:
+          type: ["string", "null"]
+        port:
+          type: ["integer", "null"]
+        username:
+          type: ["string", "null"]
+        fromEmail:
+          type: ["string", "null"]
+        fromName:
+          type: ["string", "null"]
+        secure:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - secure
+        - createdAt
+        - updatedAt
+
+    SmtpSettingsInput:
+      type: object
+      properties:
+        host:
+          type: ["string", "null"]
+        port:
+          type: ["integer", "null"]
+        username:
+          type: ["string", "null"]
+        password:
+          type: ["string", "null"]
+        fromEmail:
+          type: ["string", "null"]
+        fromName:
+          type: ["string", "null"]
+        secure:
+          type: boolean
+
+    TestEmailInput:
+      type: object
+      properties:
+        toEmail:
+          type: string
+      required:
+        - toEmail
+
+    ReminderSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        daysBeforeExpiry:
+          type: integer
+        repeatEveryDays:
+          type: integer
+        overdueRepeatDays:
+          type: integer
+        cronTime:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - daysBeforeExpiry
+        - repeatEveryDays
+        - overdueRepeatDays
+        - cronTime
+        - createdAt
+        - updatedAt
+
+    ReminderSettingsInput:
+      type: object
+      properties:
+        daysBeforeExpiry:
+          type: integer
+        repeatEveryDays:
+          type: integer
+        overdueRepeatDays:
+          type: integer
+        cronTime:
+          type: string
+
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        dateOfBirth:
+          type: ["string", "null"]
+        classRoom:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive]
+        notes:
+          type: ["string", "null"]
+        parent1Name:
+          type: string
+        parent1Email:
+          type: string
+        parent1Phone:
+          type: ["string", "null"]
+        parent2Name:
+          type: ["string", "null"]
+        parent2Email:
+          type: ["string", "null"]
+        parent2Phone:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - fullName
+        - status
+        - parent1Name
+        - parent1Email
+        - createdAt
+        - updatedAt
+
+    StudentInput:
+      type: object
+      properties:
+        fullName:
+          type: string
+        dateOfBirth:
+          type: ["string", "null"]
+        classRoom:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive]
+        notes:
+          type: ["string", "null"]
+        parent1Name:
+          type: string
+        parent1Email:
+          type: string
+        parent1Phone:
+          type: ["string", "null"]
+        parent2Name:
+          type: ["string", "null"]
+        parent2Email:
+          type: ["string", "null"]
+        parent2Phone:
+          type: ["string", "null"]
+      required:
+        - fullName
+        - parent1Name
+        - parent1Email
+
+    StudentDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        dateOfBirth:
+          type: ["string", "null"]
+        classRoom:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive]
+        notes:
+          type: ["string", "null"]
+        parent1Name:
+          type: string
+        parent1Email:
+          type: string
+        parent1Phone:
+          type: ["string", "null"]
+        parent2Name:
+          type: ["string", "null"]
+        parent2Email:
+          type: ["string", "null"]
+        parent2Phone:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        checklistItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChecklistItem"
+      required:
+        - id
+        - fullName
+        - status
+        - parent1Name
+        - parent1Email
+        - createdAt
+        - updatedAt
+        - checklistItems
+
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        role:
+          type: ["string", "null"]
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - fullName
+        - email
+        - status
+        - createdAt
+        - updatedAt
+
+    EmployeeInput:
+      type: object
+      properties:
+        fullName:
+          type: string
+        role:
+          type: ["string", "null"]
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive]
+        notes:
+          type: ["string", "null"]
+      required:
+        - fullName
+        - email
+
+    EmployeeDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        role:
+          type: ["string", "null"]
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        checklistItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChecklistItem"
+      required:
+        - id
+        - fullName
+        - email
+        - status
+        - createdAt
+        - updatedAt
+        - checklistItems
+
+    DocumentType:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+          enum: [student, employee, both]
+        description:
+          type: ["string", "null"]
+        isRequired:
+          type: boolean
+        isActive:
+          type: boolean
+        templateFormUrl:
+          type: ["string", "null"]
+        usageCount:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - name
+        - category
+        - isRequired
+        - isActive
+        - usageCount
+        - createdAt
+        - updatedAt
+
+    DocumentTypeInput:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+          enum: [student, employee, both]
+        description:
+          type: ["string", "null"]
+        isRequired:
+          type: boolean
+        isActive:
+          type: boolean
+      required:
+        - name
+        - category
+        - isRequired
+
+    ChecklistItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        personType:
+          type: string
+          enum: [student, employee]
+        personId:
+          type: integer
+        personName:
+          type: string
+        personEmail:
+          type: ["string", "null"]
+        personStatus:
+          type: string
+          enum: [active, inactive]
+        documentTypeId:
+          type: integer
+        documentTypeName:
+          type: string
+        documentTypeCategory:
+          type: string
+        templateFormUrl:
+          type: ["string", "null"]
+        expiryDate:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [missing, valid, expiring_soon, due_today, overdue]
+        notes:
+          type: ["string", "null"]
+        lastReminderSentAt:
+          type: ["string", "null"]
+        nextReminderDueAt:
+          type: ["string", "null"]
+        daysUntilExpiry:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - personType
+        - personId
+        - personName
+        - personStatus
+        - documentTypeId
+        - documentTypeName
+        - documentTypeCategory
+        - status
+        - createdAt
+        - updatedAt
+
+    ChecklistItemUpdate:
+      type: object
+      properties:
+        expiryDate:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    BulkChecklistUpdate:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              expiryDate:
+                type: ["string", "null"]
+              notes:
+                type: ["string", "null"]
+            required:
+              - id
+      required:
+        - items
+
+    EmailLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        recipientEmail:
+          type: string
+        ccEmail:
+          type: ["string", "null"]
+        personType:
+          type: string
+          enum: [student, employee]
+        personId:
+          type: integer
+        personName:
+          type: string
+        checklistItemId:
+          type: integer
+        documentTypeId:
+          type: integer
+        documentTypeName:
+          type: string
+        emailSubject:
+          type: string
+        emailStatus:
+          type: string
+          enum: [sent, failed]
+        errorMessage:
+          type: ["string", "null"]
+        reminderType:
+          type: string
+          enum: [automatic, manual, overdue]
+        sentAt:
+          type: string
+      required:
+        - id
+        - recipientEmail
+        - personType
+        - personId
+        - personName
+        - checklistItemId
+        - documentTypeId
+        - documentTypeName
+        - emailSubject
+        - emailStatus
+        - reminderType
+        - sentAt
+
+    EmailLogPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EmailLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - limit
+
+    DashboardStats:
+      type: object
+      properties:
+        missingDocuments:
+          type: integer
+        expiringIn30Days:
+          type: integer
+        dueToday:
+          type: integer
+        overdueDocuments:
+          type: integer
+        totalActiveStudents:
+          type: integer
+        totalActiveEmployees:
+          type: integer
+        remindersSentThisMonth:
+          type: integer
+        failedEmails:
+          type: integer
+      required:
+        - missingDocuments
+        - expiringIn30Days
+        - dueToday
+        - overdueDocuments
+        - totalActiveStudents
+        - totalActiveEmployees
+        - remindersSentThisMonth
+        - failedEmails

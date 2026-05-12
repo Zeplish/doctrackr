@@ -1,0 +1,746 @@
+Build a production-ready MVP web application from scratch called:
+
+DocTrackr
+
+Tagline:
+Never miss an important document renewal.
+
+Purpose:
+DocTrackr is a HIPAA-conscious document expiry tracking and reminder system for daycare/school operations. It does NOT store completed student/employee documents. It only tracks document names, required document checklists, expiry dates, reminder status, and sends branded reminder emails.
+
+Important Product Rule:
+Do NOT build a system for storing completed documents.
+Do NOT upload, view, download, or replace completed student/employee documents.
+The daycare keeps physical copies separately.
+The software only tracks expiry/compliance status.
+
+However:
+Admin should be able to upload blank template forms for student document types only, so those blank forms can be attached to parent reminder emails.
+
+==================================================
+TECH STACK
+==================================================
+
+Use:
+- Next.js latest stable version
+- TypeScript
+- PostgreSQL
+- Prisma ORM
+- Tailwind CSS
+- Node cron or equivalent scheduled job
+- Nodemailer for emails
+- Local server storage only for blank template forms
+- Docker-ready deployment
+- Clean reusable component architecture
+
+Include:
+- Dockerfile
+- docker-compose.yml
+- .env.example
+- README setup guide
+- Prisma migrations
+- Seed data
+
+==================================================
+AUTHENTICATION
+==================================================
+
+Create simple secure admin login.
+
+MVP roles:
+- Admin only
+
+Admin can manage:
+- Dashboard
+- Students
+- Employees
+- Document Types
+- Expiry Dates
+- Reminder Settings
+- Organization Branding
+
+==================================================
+CORE PRODUCT CONCEPT
+==================================================
+
+Each person has required document checklist items.
+
+Students have fewer required documents.
+Employees have many required documents.
+
+The admin should not manually add every document one by one.
+
+Instead:
+
+Add Student
+→ View Student Profile
+→ System automatically shows required student document checklist
+→ Admin enters expiry dates in a table
+
+Add Employee
+→ View Employee Profile
+→ System automatically shows required employee document checklist
+→ Admin enters expiry dates in a table
+
+Goal:
+Admin should be able to update 32 employee document expiry dates in under 2 minutes.
+
+==================================================
+STUDENT MANAGEMENT
+==================================================
+
+Create Students module.
+
+Fields:
+
+Student:
+- Full Name
+- Date of Birth optional
+- Class/Room optional
+- Status: Active / Inactive
+- Notes optional
+
+Parent / Guardian 1:
+- Name
+- Email
+- Phone
+
+Parent / Guardian 2:
+- Name
+- Email
+- Phone
+
+Parent 2 is optional.
+
+Student profile page should show:
+- Student details
+- Parent/guardian details
+- Required document checklist
+- Expiry dates
+- Status
+- Reminder status
+- Notes
+- Last reminder sent date
+- Next reminder due date
+
+Student document reminders should go to:
+- Parent 1 email
+- Parent 2 email if available
+
+CC:
+- Organization/admin email if configured
+
+==================================================
+EMPLOYEE MANAGEMENT
+==================================================
+
+Create Employees module.
+
+Fields:
+
+Employee:
+- Full Name
+- Role / Designation
+- Email
+- Phone
+- Status: Active / Inactive
+- Notes optional
+
+Employee profile page should show:
+- Employee details
+- Required document checklist
+- Expiry dates
+- Status
+- Reminder status
+- Notes
+- Last reminder sent date
+- Next reminder due date
+
+Employee document reminders should go to:
+- Employee email
+
+CC:
+- Organization/admin email if configured
+
+==================================================
+DOCUMENT TYPES
+==================================================
+
+Create Document Types module.
+
+Admin can:
+- Create document type
+- Edit document type
+- Deactivate document type
+- Reactivate document type
+- Delete only if unused
+
+Fields:
+- Name
+- Category:
+  - Student
+  - Employee
+  - Both
+- Description optional
+- Is Required: true/false
+- Active Status
+- Template Form PDF optional
+- Created At
+- Updated At
+
+Important:
+Template Form PDF is only for blank forms, not completed documents.
+
+Template form usage:
+- Student document types may have blank template forms attached
+- Employee document types usually do not need attachments
+- If a student reminder is sent and the document type has a template form, attach the blank form PDF to the reminder email
+
+Document type safety:
+- If document type has no linked checklist records, allow permanent delete
+- If document type is linked to any student/employee checklist, do NOT allow delete
+- Show warning:
+  “This document type is being used in X records and cannot be deleted. Please deactivate it instead.”
+- Deactivated document types should not appear in new checklists
+- Existing records should still display deactivated document types
+
+Filters:
+- All
+- Active
+- Inactive
+- Student
+- Employee
+- Both
+
+==================================================
+PRE-POPULATED REQUIRED CHECKLISTS
+==================================================
+
+When a new student is created:
+Automatically create checklist rows for all active document types where:
+- Category = Student
+or
+- Category = Both
+
+When a new employee is created:
+Automatically create checklist rows for all active document types where:
+- Category = Employee
+or
+- Category = Both
+
+Checklist record fields:
+- Person Type: Student / Employee
+- Person ID
+- Document Type ID
+- Expiry Date nullable
+- Notes optional
+- Status calculated
+- Last Reminder Sent At nullable
+- Next Reminder Due At nullable
+- Created At
+- Updated At
+
+Do not require expiry date at creation.
+If expiry date is empty, status should be Missing.
+
+==================================================
+BULK EXPIRY DATE ENTRY UX
+==================================================
+
+On Student Profile and Employee Profile, show editable checklist table.
+
+Columns:
+- Document Name
+- Expiry Date
+- Status
+- Last Reminder Sent
+- Next Reminder Due
+- Notes
+- Actions
+
+Admin should be able to:
+- Edit expiry date inline
+- Edit notes inline
+- Save row
+- Save all rows
+
+This is critical for employee records because employee checklist can have around 32 documents.
+
+Add visual statuses:
+
+Missing:
+No expiry date entered
+
+Valid:
+Expiry date is more than 30 days away
+
+Expiring Soon:
+Expiry date is within next 30 days
+
+Due Today:
+Expiry date is today
+
+Overdue:
+Expiry date has passed
+
+Status colors:
+- Missing: Gray
+- Valid: Green
+- Expiring Soon: Yellow/Orange
+- Due Today: Orange/Red
+- Overdue: Red
+
+==================================================
+REMINDER LOGIC
+==================================================
+
+Replace old 7-day reminder logic.
+
+New reminder schedule:
+
+Start sending reminders 30 days before expiry.
+
+Send every 3 days until expiry date.
+
+Example:
+Expiry Date = May 31
+
+Send reminders on:
+May 1
+May 4
+May 7
+May 10
+May 13
+May 16
+May 19
+May 22
+May 25
+May 28
+May 31
+
+After expiry:
+Continue reminders every 7 days until expiry date is updated.
+
+Cron:
+- Run daily
+- Recommended default time: 9 AM server time
+- Configurable in settings if practical
+
+Duplicate protection:
+- Do not send more than one reminder per checklist item per day
+- Use email_logs table
+- Track sent reminders carefully
+- Prevent duplicate sends if cron runs twice
+
+Reminder eligibility:
+- Only active students/employees
+- Only checklist items with expiry date
+- Only documents that are within reminder window or overdue
+
+When expiry date is updated:
+- Recalculate status
+- Recalculate next reminder due date
+- Continue future reminders based on new expiry date
+
+Manual reminder:
+Admin should have “Send Reminder Now” action for checklist items.
+
+==================================================
+EMAIL LOGS
+==================================================
+
+Create Email Logs module or table.
+
+Fields:
+- ID
+- Recipient email
+- CC email optional
+- Person type
+- Person ID
+- Checklist item ID
+- Document type ID
+- Email subject
+- Email status: Sent / Failed
+- Error message optional
+- Sent At
+- Reminder Type:
+  - Automatic
+  - Manual
+  - Overdue
+
+Admin should be able to view email history from:
+- Student profile
+- Employee profile
+- Checklist item
+- Global email logs page optional
+
+==================================================
+ORGANIZATION BRANDING
+==================================================
+
+Create Settings → Organization Branding.
+
+Do NOT hardcode “Step Ahead Day Care”.
+
+Default seed values can be:
+- Organization Name: Step Ahead Day Care
+- Sender Name: Administration Team
+- Tagline: Never miss an important document renewal
+
+Fields:
+- Organization Name
+- Logo Upload optional
+- Organization Email
+- Phone Number
+- Address
+- Website optional
+- Sender Name
+- Sender Email
+- Email Footer Signature
+- Primary Brand Color
+- Secondary Brand Color
+
+Use organization branding throughout:
+- Dashboard header
+- Login page
+- Sidebar
+- Reminder emails
+- Email footer
+- Browser title/meta where relevant
+
+This should make DocTrackr reusable for future daycare clients.
+
+==================================================
+PROFESSIONAL HTML EMAIL SYSTEM
+==================================================
+
+Build reusable HTML email templates with plain-text fallback.
+
+Emails should be:
+- Branded
+- Mobile-friendly
+- Professional
+- Warm
+- Parent-friendly
+- Gmail/Outlook compatible
+
+Use organization settings dynamically:
+- Organization name
+- Logo
+- Brand colors
+- Sender name
+- Phone
+- Email
+- Website
+- Footer signature
+
+Do not hardcode daycare name except seed/default value.
+
+--------------------------------------------------
+STUDENT EMAIL TEMPLATE
+--------------------------------------------------
+
+Subject:
+Action Required: Updated [Document Type] Needed for [Child Name]
+
+Greeting:
+Dear Parent/Guardian,
+
+Body:
+We hope you are doing well.
+
+This is a friendly reminder from [Organization Name] that your child, [Child Name]’s [Document Type] is scheduled to expire on [Expiry Date].
+
+To help us maintain updated records and ensure uninterrupted compliance, we kindly request that you complete and submit an updated copy at your earliest convenience.
+
+If a blank form is attached, kindly print, complete, and return it to the daycare.
+
+If you have already submitted the updated document, please disregard this message.
+
+Card section:
+- Child Name
+- Document Type
+- Expiry Date
+- Status
+
+Footer:
+Warm regards,
+[Sender Name]
+[Organization Name]
+[Phone]
+[Email]
+[Website optional]
+
+Footer note:
+This is an automated reminder from [Organization Name].
+
+--------------------------------------------------
+EMPLOYEE EMAIL TEMPLATE
+--------------------------------------------------
+
+Subject:
+Action Required: Updated [Document Type] Needed
+
+Greeting:
+Dear [Employee Name],
+
+Body:
+This is a reminder that your [Document Type] is scheduled to expire on [Expiry Date].
+
+Please complete and submit an updated copy at your earliest convenience so records remain current.
+
+If you have already submitted the updated document, please disregard this reminder.
+
+Footer:
+Regards,
+[Sender Name]
+[Organization Name]
+
+--------------------------------------------------
+ATTACHMENT LOGIC
+--------------------------------------------------
+
+For student reminders:
+If document type has a blank template form PDF, attach it.
+
+For employee reminders:
+No attachment required by default.
+
+==================================================
+DASHBOARD
+==================================================
+
+Create admin dashboard with cards:
+
+- Missing Documents
+- Expiring in Next 30 Days
+- Due Today
+- Overdue Documents
+- Total Active Students
+- Total Active Employees
+- Reminders Sent This Month
+- Failed Emails
+
+Dashboard tables:
+
+1. Expiring Soon
+Columns:
+- Person Name
+- Person Type
+- Document Type
+- Expiry Date
+- Days Remaining
+- Contact
+- Action
+
+2. Overdue
+Columns:
+- Person Name
+- Person Type
+- Document Type
+- Expiry Date
+- Days Overdue
+- Contact
+- Action
+
+3. Missing Documents
+Columns:
+- Person Name
+- Person Type
+- Document Type
+- Contact
+- Action
+
+Actions:
+- View profile
+- Send reminder now
+
+Filters:
+- Students
+- Employees
+- Missing
+- Expiring Soon
+- Due Today
+- Overdue
+- Document Type
+- Search by name
+
+==================================================
+DOCUMENTS / COMPLIANCE PAGE
+==================================================
+
+Create global Compliance or Documents page.
+
+This should show all checklist items across students and employees.
+
+Columns:
+- Person Name
+- Person Type
+- Document Type
+- Expiry Date
+- Status
+- Last Reminder Sent
+- Next Reminder Due
+- Contact
+- Actions
+
+Filters:
+- Person Type
+- Status
+- Document Type
+- Date Range
+- Active/Inactive people
+- Search
+
+Actions:
+- View person profile
+- Edit expiry date
+- Edit notes
+- Send reminder now
+
+No upload/view/download of completed documents.
+
+==================================================
+SETTINGS
+==================================================
+
+Settings pages:
+
+1. Organization Branding
+2. Email / SMTP Settings
+3. Reminder Settings
+
+Email / SMTP Settings fields:
+- SMTP Host
+- SMTP Port
+- SMTP Username
+- SMTP Password
+- From Email
+- From Name
+- Test Email button
+
+Reminder Settings fields:
+- Reminder starts before expiry: default 30 days
+- Repeat every X days before expiry: default 3 days
+- Overdue repeat every X days: default 7 days
+- Admin CC email
+- Daily cron time if practical
+
+Store settings in database.
+
+==================================================
+SEED DATA
+==================================================
+
+Create useful seed data:
+
+Organization:
+Step Ahead Day Care
+
+Student document types:
+- Health Assessment Form
+- Immunization Record
+
+Employee document types:
+Use placeholders for around 32 employee document types. Include examples:
+- Staff Credential
+- Background Screening
+- CPR Certification
+- First Aid Certification
+- Medical Fitness Report
+- Employment Eligibility Form
+- Driver License
+- Training Certificate
+- Annual Health Statement
+- Emergency Contact Form
+
+Create:
+- 5 sample students
+- 5 sample employees
+- sample expiry dates:
+  - missing
+  - valid
+  - expiring soon
+  - due today
+  - overdue
+
+==================================================
+SECURITY
+==================================================
+
+- Secure admin authentication
+- Protect all routes
+- Validate inputs
+- Sanitize uploaded blank template form filenames
+- Allow PDF only for blank template forms
+- Do not expose server file paths
+- No completed document storage
+
+==================================================
+UI / DESIGN
+==================================================
+
+Design:
+- Modern SaaS admin panel
+- Clean sidebar navigation
+- Professional daycare/school operations feel
+- Responsive
+- Fast
+- Minimal
+- Clear badges
+- Good empty states
+- Good loading states
+- Tables with pagination/search/sort
+
+Sidebar:
+- Dashboard
+- Students
+- Employees
+- Compliance
+- Document Types
+- Email Logs
+- Settings
+
+Brand:
+DocTrackr
+
+Logo:
+Simple text logo with document/check/shield/tracking icon.
+Do not overdesign.
+
+==================================================
+DEPLOYMENT
+==================================================
+
+App should be deployable on Oracle VPS using Docker.
+
+Provide:
+- Dockerfile
+- docker-compose.yml
+- PostgreSQL container
+- persistent volume for database
+- persistent local folder for blank template PDFs and logo
+- .env.example
+- README with deployment steps
+
+Do not use cloud storage.
+Do not use Supabase storage.
+
+==================================================
+FINAL IMPORTANT NOTES
+==================================================
+
+This is not a document management system.
+
+This is a HIPAA-conscious daycare compliance expiry tracker.
+
+The daycare keeps physical files.
+
+DocTrackr only tracks:
+- which document is required
+- expiry date
+- status
+- who should be reminded
+- when reminders were sent
+
+Keep the MVP practical, reliable, and simple.
