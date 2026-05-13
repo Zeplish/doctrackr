@@ -64,8 +64,8 @@ export default function LoginPage() {
             </div>
             <div className="rounded-xl bg-white/10 p-4">
               <Users className="h-5 w-5 text-white/70 mb-2" />
-              <p className="font-semibold text-sm mb-1">Students & Staff</p>
-              <p className="text-white/50 text-xs">Manage compliance for everyone</p>
+              <p className="font-semibold text-sm mb-1">Compliance Reports</p>
+              <p className="text-white/50 text-xs">Full audit trail and status views</p>
             </div>
           </div>
         </div>
