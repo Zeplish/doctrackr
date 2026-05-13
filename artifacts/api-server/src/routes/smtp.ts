@@ -10,7 +10,7 @@ const router = Router();
 async function ensureSmtp() {
   const [smtp] = await db.select().from(smtpSettingsTable).limit(1);
   if (!smtp) {
-    const [created] = await db.insert(smtpSettingsTable).values({ secure: false }).returning();
+    const [created] = await db.insert(smtpSettingsTable).values({ secure: true }).returning();
     return created;
   }
   return smtp;
@@ -32,7 +32,7 @@ router.put("/smtp-settings", async (req, res): Promise<void> => {
     const parsed = UpdateSmtpSettingsBody.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid input" }); return; }
     const smtp = await ensureSmtp();
-    const updateData: Record<string, unknown> = { ...parsed.data, updatedAt: new Date() };
+    const updateData: Record<string, unknown> = { ...parsed.data, secure: true, updatedAt: new Date() };
     if (!parsed.data!.password) delete updateData.password;
     const [updated] = await db.update(smtpSettingsTable)
       .set(updateData)

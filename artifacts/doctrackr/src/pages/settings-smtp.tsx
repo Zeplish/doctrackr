@@ -64,11 +64,9 @@ export default function SmtpSettingsPage() {
 
   const onSubmit = async (values: SmtpFormValues) => {
     try {
-      const payload: any = { ...values, secure: true };
-      if (!values.password) {
-        delete payload.password;
-      }
-      await updateSmtp.mutateAsync({ data: payload });
+      const { password, ...rest } = values;
+      const data = { ...rest, secure: true, ...(password ? { password } : {}) };
+      await updateSmtp.mutateAsync({ data });
       qc.invalidateQueries({ queryKey: getGetSmtpSettingsQueryKey() });
       toast.success("SMTP settings saved successfully");
     } catch (e) {
@@ -82,7 +80,7 @@ export default function SmtpSettingsPage() {
       return;
     }
     try {
-      const res = await testSmtp.mutateAsync({ data: { toEmail: testEmail } as any });
+      const res = await testSmtp.mutateAsync({ data: { toEmail: testEmail } });
       if (res.success) {
         toast.success("Test email sent successfully", { description: "Check your inbox to confirm." });
       } else {

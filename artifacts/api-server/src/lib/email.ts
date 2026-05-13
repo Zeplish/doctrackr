@@ -26,17 +26,10 @@ export async function getOrgAndSmtp() {
 }
 
 function applyTemplate(template: string, vars: Record<string, string>): string {
-  return template.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? `{${key}}`);
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
 }
 
-function wrapInHtml(body: string, orgName: string, color: string, logoUrl: string | null, emailFooter: string | null): string {
-  const escaped = body
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .split("\n")
-    .map((line) => `<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 8px;">${line || "&nbsp;"}</p>`)
-    .join("");
+function wrapInHtml(bodyHtml: string, orgName: string, color: string, logoUrl: string | null, emailFooter: string | null): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
@@ -46,7 +39,7 @@ function wrapInHtml(body: string, orgName: string, color: string, logoUrl: strin
       ${logoUrl ? `<img src="${logoUrl}" alt="${orgName}" style="max-height:48px;display:block;margin:0 auto 12px;" />` : ""}
       <h1 style="color:#ffffff;margin:0;font-size:22px;">${orgName}</h1>
     </div>
-    <div style="padding:32px 24px;">${escaped}</div>
+    <div style="padding:32px 24px;">${bodyHtml}</div>
     <div style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:16px 24px;text-align:center;">
       <p style="color:#9ca3af;font-size:12px;margin:0;">${emailFooter || `This is an automated reminder from ${orgName}.`}</p>
     </div>
@@ -82,6 +75,9 @@ export function buildStudentReminderEmail(params: {
       documentType,
       expiryDate,
       status: status.replace("_", " "),
+      orgPhone: orgPhone || "",
+      orgEmail: orgEmail || "",
+      orgWebsite: orgWebsite || "",
     };
     const body = applyTemplate(customTemplate, vars);
     const html = wrapInHtml(body, orgName, color, logoUrl, emailFooter);
@@ -204,6 +200,8 @@ export async function sendReminderEmail(params: {
     subject,
     html,
     attachments,
+    replyTo: smtp.fromEmail || undefined,
+    headers: { "X-Mailer": "DocTrackr" },
   };
 
   const ccAddresses: string[] = [];

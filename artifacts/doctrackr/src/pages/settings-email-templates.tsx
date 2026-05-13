@@ -24,25 +24,21 @@ const templateSchema = z.object({
 
 type TemplateFormValues = z.infer<typeof templateSchema>;
 
-const STUDENT_PLACEHOLDER = `Dear Parent/Guardian,
+const STUDENT_PLACEHOLDER = `<p>Dear Parent/Guardian,</p>
 
-This is a reminder from {orgName} that {studentName}'s {documentType} is scheduled to expire on {expiryDate}.
+<p>This is a reminder from <strong>{{orgName}}</strong> that <strong>{{studentName}}</strong>'s <strong>{{documentType}}</strong> is scheduled to expire on <strong>{{expiryDate}}</strong>.</p>
 
-Please submit an updated copy at your earliest convenience.
+<p>Please submit an updated copy at your earliest convenience.</p>
 
-Warm regards,
-{senderName}
-{orgName}`;
+<p>Warm regards,<br>{{senderName}}<br>{{orgName}}</p>`;
 
-const EMPLOYEE_PLACEHOLDER = `Dear {employeeName},
+const EMPLOYEE_PLACEHOLDER = `<p>Dear {{employeeName}},</p>
 
-This is a reminder that your {documentType} is scheduled to expire on {expiryDate}.
+<p>This is a reminder that your <strong>{{documentType}}</strong> is scheduled to expire on <strong>{{expiryDate}}</strong>.</p>
 
-Please submit an updated copy at your earliest convenience.
+<p>Please submit an updated copy at your earliest convenience.</p>
 
-Regards,
-{senderName}
-{orgName}`;
+<p>Regards,<br>{{senderName}}<br>{{orgName}}</p>`;
 
 export default function EmailTemplatesPage() {
   const qc = useQueryClient();
@@ -110,15 +106,18 @@ export default function EmailTemplatesPage() {
           <div>
             <p className="font-medium mb-1">Available placeholders</p>
             <p className="text-blue-600">
-              <code className="bg-blue-100 px-1 rounded">{"{orgName}"}</code>{" "}
-              <code className="bg-blue-100 px-1 rounded">{"{senderName}"}</code>{" "}
-              <code className="bg-blue-100 px-1 rounded">{"{studentName}"}</code>{" "}
-              <code className="bg-blue-100 px-1 rounded">{"{employeeName}"}</code>{" "}
-              <code className="bg-blue-100 px-1 rounded">{"{documentType}"}</code>{" "}
-              <code className="bg-blue-100 px-1 rounded">{"{expiryDate}"}</code>{" "}
-              <code className="bg-blue-100 px-1 rounded">{"{status}"}</code>
+              <code className="bg-blue-100 px-1 rounded">{"{{orgName}}"}</code>{" "}
+              <code className="bg-blue-100 px-1 rounded">{"{{senderName}}"}</code>{" "}
+              <code className="bg-blue-100 px-1 rounded">{"{{studentName}}"}</code>{" "}
+              <code className="bg-blue-100 px-1 rounded">{"{{employeeName}}"}</code>{" "}
+              <code className="bg-blue-100 px-1 rounded">{"{{documentType}}"}</code>{" "}
+              <code className="bg-blue-100 px-1 rounded">{"{{expiryDate}}"}</code>{" "}
+              <code className="bg-blue-100 px-1 rounded">{"{{status}}"}</code>{" "}
+              <code className="bg-blue-100 px-1 rounded">{"{{orgPhone}}"}</code>{" "}
+              <code className="bg-blue-100 px-1 rounded">{"{{orgEmail}}"}</code>{" "}
+              <code className="bg-blue-100 px-1 rounded">{"{{orgWebsite}}"}</code>
             </p>
-            <p className="text-blue-600 mt-1">Leave blank to use the built-in default template.</p>
+            <p className="text-blue-600 mt-1">Templates use HTML. Leave blank to use the built-in default template.</p>
           </div>
         </div>
 
@@ -137,7 +136,7 @@ export default function EmailTemplatesPage() {
               <CardContent>
                 <FormField control={form.control} name="studentEmailTemplate" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Body (plain text)</FormLabel>
+                    <FormLabel>Email Body (HTML)</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -146,7 +145,7 @@ export default function EmailTemplatesPage() {
                         className="min-h-[200px] font-mono text-sm"
                       />
                     </FormControl>
-                    <FormDescription>The plain-text body of the reminder email sent to parents.</FormDescription>
+                    <FormDescription>HTML body injected into the branded email wrapper. Use {"{{placeholder}}"} for dynamic values.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -166,7 +165,7 @@ export default function EmailTemplatesPage() {
               <CardContent>
                 <FormField control={form.control} name="employeeEmailTemplate" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Body (plain text)</FormLabel>
+                    <FormLabel>Email Body (HTML)</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -175,7 +174,7 @@ export default function EmailTemplatesPage() {
                         className="min-h-[200px] font-mono text-sm"
                       />
                     </FormControl>
-                    <FormDescription>The plain-text body of the reminder email sent to employees.</FormDescription>
+                    <FormDescription>HTML body injected into the branded email wrapper. Use {"{{placeholder}}"} for dynamic values.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )} />
