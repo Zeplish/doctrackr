@@ -24,6 +24,7 @@ import {
   Settings,
   ChevronRight,
   LogOut,
+  KeyRound,
 } from "lucide-react";
 import { ReactNode } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -132,6 +133,12 @@ export function Layout({ children, title }: { children: ReactNode; title: string
                         <Link href="/settings/reminders" className="flex items-center gap-2">
                           <Bell className="h-4 w-4" />
                           <span>Reminders</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      <SidebarMenuButton asChild isActive={location === "/settings/credentials"} size="sm">
+                        <Link href="/settings/credentials" className="flex items-center gap-2">
+                          <KeyRound className="h-4 w-4" />
+                          <span>Credentials</span>
                         </Link>
                       </SidebarMenuButton>
                     </div>

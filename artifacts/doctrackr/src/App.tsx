@@ -16,6 +16,7 @@ import EmailLogsPage from "@/pages/email-logs";
 import OrgSettingsPage from "@/pages/settings-org";
 import SmtpSettingsPage from "@/pages/settings-smtp";
 import ReminderSettingsPage from "@/pages/settings-reminders";
+import CredentialsSettingsPage from "@/pages/settings-credentials";
 import { useMe } from "@/lib/auth";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -49,6 +50,7 @@ function Routes() {
       <Route path="/settings/organization"><ProtectedRoute component={OrgSettingsPage} /></Route>
       <Route path="/settings/smtp"><ProtectedRoute component={SmtpSettingsPage} /></Route>
       <Route path="/settings/reminders"><ProtectedRoute component={ReminderSettingsPage} /></Route>
+      <Route path="/settings/credentials"><ProtectedRoute component={CredentialsSettingsPage} /></Route>
       <Route>
         <div className="flex h-screen items-center justify-center">404 Not Found</div>
       </Route>

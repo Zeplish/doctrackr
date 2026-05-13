@@ -17,6 +17,8 @@ export const organizationTable = pgTable("organization", {
   secondaryColor: text("secondary_color").default("#1e40af"),
   tagline: text("tagline").default("Never miss an important document renewal."),
   adminCcEmail: text("admin_cc_email"),
+  authUsername: text("auth_username"),
+  authPasswordHash: text("auth_password_hash"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
