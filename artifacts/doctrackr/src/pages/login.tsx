@@ -4,7 +4,7 @@ import { useLogin } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ClipboardCheck } from "lucide-react";
+import { FileText, Bell, ShieldCheck, BarChart3, Users } from "lucide-react";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -25,17 +25,66 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-sidebar px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex items-center justify-center rounded-xl bg-sidebar-primary/20 p-3">
-            <ClipboardCheck className="h-8 w-8 text-sidebar-primary" />
+    <div className="flex min-h-screen">
+      {/* Left panel */}
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 text-white"
+        style={{ backgroundColor: "hsl(232 51% 24%)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center rounded-lg bg-white/15 p-2">
+            <FileText className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">DocTrackr</h1>
-          <p className="text-sm text-white/60">Sign in to your account</p>
+          <span className="text-xl font-bold tracking-tight">DocTrackr</span>
         </div>
 
-        <div className="rounded-2xl bg-white p-8 shadow-xl">
+        <div>
+          <h1 className="text-4xl font-bold leading-tight mb-4">
+            Document compliance,<br />without the chaos.
+          </h1>
+          <p className="text-white/60 text-lg leading-relaxed mb-10">
+            Track expiring documents for every student and employee — and stay ahead of renewals automatically.
+          </p>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-xl bg-white/10 p-4">
+              <Bell className="h-5 w-5 text-white/70 mb-2" />
+              <p className="font-semibold text-sm mb-1">Automated Reminders</p>
+              <p className="text-white/50 text-xs">Email alerts before documents expire</p>
+            </div>
+            <div className="rounded-xl bg-white/10 p-4">
+              <FileText className="h-5 w-5 text-white/70 mb-2" />
+              <p className="font-semibold text-sm mb-1">Document Tracking</p>
+              <p className="text-white/50 text-xs">Expiry dates and reminder history</p>
+            </div>
+            <div className="rounded-xl bg-white/10 p-4">
+              <BarChart3 className="h-5 w-5 text-white/70 mb-2" />
+              <p className="font-semibold text-sm mb-1">Status Dashboard</p>
+              <p className="text-white/50 text-xs">Overdue and missing items at a glance</p>
+            </div>
+            <div className="rounded-xl bg-white/10 p-4">
+              <Users className="h-5 w-5 text-white/70 mb-2" />
+              <p className="font-semibold text-sm mb-1">Students & Staff</p>
+              <p className="text-white/50 text-xs">Manage compliance for everyone</p>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-white/30 text-xs">
+          &copy; {new Date().getFullYear()} DocTrackr. All rights reserved.
+        </p>
+      </div>
+
+      {/* Right panel */}
+      <div className="flex flex-1 flex-col items-center justify-center bg-background px-6 py-12">
+        <div className="w-full max-w-sm">
+          <div className="mb-2 flex items-center gap-2 lg:hidden">
+            <FileText className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold tracking-tight">DocTrackr</span>
+          </div>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground mb-1">Sign in</h2>
+          <p className="text-sm text-muted-foreground mb-8">Access your compliance dashboard</p>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="username">Username</Label>
@@ -66,6 +115,13 @@ export default function LoginPage() {
               {login.isPending ? "Signing in…" : "Sign In"}
             </Button>
           </form>
+
+          <div className="mt-6 flex items-center gap-2 rounded-lg border border-muted bg-muted/40 px-3 py-2.5">
+            <ShieldCheck className="h-4 w-4 text-muted-foreground shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              Default credentials: <strong>admin</strong> / <strong>changeme</strong>
+            </p>
+          </div>
         </div>
       </div>
     </div>

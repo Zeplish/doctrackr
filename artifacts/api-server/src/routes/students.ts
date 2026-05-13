@@ -65,9 +65,9 @@ router.post("/students", async (req, res): Promise<void> => {
 router.get("/students/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
     const [student] = await db.select().from(studentsTable).where(eq(studentsTable.id, id));
-    if (!student) res.status(404).json({ error: "Student not found" }); return;
+    if (!student) { res.status(404).json({ error: "Student not found" }); return; }
 
     const checklist = await db
       .select({
@@ -116,14 +116,14 @@ router.get("/students/:id", async (req, res): Promise<void> => {
 router.put("/students/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
     const parsed = UpdateStudentBody.safeParse(req.body);
-    if (!parsed.success) res.status(400).json({ error: "Invalid input" }); return;
+    if (!parsed.success) { res.status(400).json({ error: "Invalid input" }); return; }
     const [updated] = await db.update(studentsTable)
       .set({ ...parsed.data, updatedAt: new Date() })
       .where(eq(studentsTable.id, id))
       .returning();
-    if (!updated) res.status(404).json({ error: "Student not found" }); return;
+    if (!updated) { res.status(404).json({ error: "Student not found" }); return; }
     res.json(updated);
   } catch (err) {
     req.log.error(err);
@@ -134,7 +134,7 @@ router.put("/students/:id", async (req, res): Promise<void> => {
 router.delete("/students/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
     await db.delete(studentsTable).where(eq(studentsTable.id, id));
     res.json({ success: true, message: "Student deleted" });
   } catch (err) {

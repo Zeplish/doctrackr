@@ -30,4 +30,8 @@ export interface OrganizationInput {
   tagline?: string | null;
   /** @nullable */
   adminCcEmail?: string | null;
+  /** @nullable */
+  studentEmailTemplate?: string | null;
+  /** @nullable */
+  employeeEmailTemplate?: string | null;
 }

@@ -10,8 +10,8 @@ import StudentsPage from "@/pages/students";
 import StudentDetailPage from "@/pages/student-detail";
 import EmployeesPage from "@/pages/employees";
 import EmployeeDetailPage from "@/pages/employee-detail";
-import CompliancePage from "@/pages/compliance";
 import DocumentTypesPage from "@/pages/document-types";
+import EmailTemplatesPage from "@/pages/settings-email-templates";
 import EmailLogsPage from "@/pages/email-logs";
 import OrgSettingsPage from "@/pages/settings-org";
 import SmtpSettingsPage from "@/pages/settings-smtp";
@@ -44,13 +44,13 @@ function Routes() {
       <Route path="/students/:id"><ProtectedRoute component={StudentDetailPage} /></Route>
       <Route path="/employees"><ProtectedRoute component={EmployeesPage} /></Route>
       <Route path="/employees/:id"><ProtectedRoute component={EmployeeDetailPage} /></Route>
-      <Route path="/compliance"><ProtectedRoute component={CompliancePage} /></Route>
       <Route path="/document-types"><ProtectedRoute component={DocumentTypesPage} /></Route>
       <Route path="/email-logs"><ProtectedRoute component={EmailLogsPage} /></Route>
       <Route path="/settings/organization"><ProtectedRoute component={OrgSettingsPage} /></Route>
       <Route path="/settings/smtp"><ProtectedRoute component={SmtpSettingsPage} /></Route>
       <Route path="/settings/reminders"><ProtectedRoute component={ReminderSettingsPage} /></Route>
       <Route path="/settings/credentials"><ProtectedRoute component={CredentialsSettingsPage} /></Route>
+      <Route path="/settings/email-templates"><ProtectedRoute component={EmailTemplatesPage} /></Route>
       <Route>
         <div className="flex h-screen items-center justify-center">404 Not Found</div>
       </Route>

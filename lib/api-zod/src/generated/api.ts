@@ -32,6 +32,8 @@ export const GetOrganizationResponse = zod.object({
   secondaryColor: zod.string().nullish(),
   tagline: zod.string().nullish(),
   adminCcEmail: zod.string().nullish(),
+  studentEmailTemplate: zod.string().nullish(),
+  employeeEmailTemplate: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
@@ -52,6 +54,8 @@ export const UpdateOrganizationBody = zod.object({
   secondaryColor: zod.string().nullish(),
   tagline: zod.string().nullish(),
   adminCcEmail: zod.string().nullish(),
+  studentEmailTemplate: zod.string().nullish(),
+  employeeEmailTemplate: zod.string().nullish(),
 });
 
 export const UpdateOrganizationResponse = zod.object({
@@ -69,6 +73,8 @@ export const UpdateOrganizationResponse = zod.object({
   secondaryColor: zod.string().nullish(),
   tagline: zod.string().nullish(),
   adminCcEmail: zod.string().nullish(),
+  studentEmailTemplate: zod.string().nullish(),
+  employeeEmailTemplate: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });

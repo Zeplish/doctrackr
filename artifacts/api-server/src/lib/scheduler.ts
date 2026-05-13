@@ -125,6 +125,7 @@ export async function runReminderJob(): Promise<void> {
           orgWebsite: org?.website ?? null,
           emailFooter: org?.emailFooter ?? null,
           logoUrl: org?.logoUrl ?? null,
+          customTemplate: org?.studentEmailTemplate ?? null,
         });
 
         const to = [s.parent1Email];
@@ -174,6 +175,7 @@ export async function runReminderJob(): Promise<void> {
           expiryDate: expiryDateFormatted,
           emailFooter: org?.emailFooter ?? null,
           logoUrl: org?.logoUrl ?? null,
+          customTemplate: org?.employeeEmailTemplate ?? null,
         });
 
         const ccEmail = await sendReminderEmail({

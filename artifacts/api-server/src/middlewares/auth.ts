@@ -56,7 +56,9 @@ export function verifySessionCookie(token: string): string | null {
     const sig = decoded.slice(lastDot + 1);
     if (sig !== sign(payload, SESSION_SECRET)) return null;
     const parts = payload.split(":");
-    return parts[1] ?? null;
+    const username = parts[1] ?? null;
+    if (!username || /^\d+$/.test(username)) return null;
+    return username;
   } catch {
     return null;
   }

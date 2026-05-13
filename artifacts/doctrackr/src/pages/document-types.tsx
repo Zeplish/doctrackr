@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, parseISO } from "date-fns";
 import {
   useListDocumentTypes,
   useCreateDocumentType,
@@ -42,13 +41,10 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
 
 const docTypeSchema = z.object({
   name: z.string().min(1, "Name is required"),
   category: z.enum(["student", "employee", "both"]),
-  description: z.string().nullable().optional(),
-  isRequired: z.boolean().default(true),
   isActive: z.boolean().default(true),
 });
 
@@ -78,8 +74,6 @@ export default function DocumentTypesPage() {
     defaultValues: {
       name: "",
       category: "student",
-      description: "",
-      isRequired: true,
       isActive: true,
     }
   });
@@ -135,8 +129,6 @@ export default function DocumentTypesPage() {
     form.reset({
       name: type.name,
       category: type.category,
-      description: type.description || "",
-      isRequired: type.isRequired,
       isActive: type.isActive,
     });
     setEditId(type.id);
@@ -187,17 +179,6 @@ export default function DocumentTypesPage() {
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="description" render={({ field }) => (
-                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <div className="flex items-center gap-6 pt-2">
-                    <FormField control={form.control} name="isRequired" render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 w-full">
-                        <div className="space-y-0.5"><FormLabel>Required Document</FormLabel></div>
-                        <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                      </FormItem>
-                    )} />
-                  </div>
                   <div className="flex justify-end pt-4">
                     <Button type="submit" disabled={createDocType.isPending}>Save</Button>
                   </div>
@@ -229,16 +210,7 @@ export default function DocumentTypesPage() {
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="description" render={({ field }) => (
-                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
-                  )} />
                   <div className="flex flex-col gap-3 pt-2">
-                    <FormField control={form.control} name="isRequired" render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                        <div className="space-y-0.5"><FormLabel>Required Document</FormLabel></div>
-                        <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                      </FormItem>
-                    )} />
                     <FormField control={form.control} name="isActive" render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                         <div className="space-y-0.5"><FormLabel>Active Status</FormLabel></div>
@@ -278,7 +250,6 @@ export default function DocumentTypesPage() {
             <TableRow>
               <TableHead>Document Name</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Required</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -289,14 +260,13 @@ export default function DocumentTypesPage() {
                 <TableRow key={i}>
                   <TableCell><Skeleton className="h-5 w-40" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-12" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                   <TableCell><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
                 </TableRow>
               ))
             ) : docTypes?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                   No document types found
                 </TableCell>
               </TableRow>
@@ -305,7 +275,6 @@ export default function DocumentTypesPage() {
                 <TableRow key={type.id} className={!type.isActive ? "opacity-60 bg-muted/20" : ""}>
                   <TableCell>
                     <div className="font-medium">{type.name}</div>
-                    {type.description && <div className="text-xs text-muted-foreground">{type.description}</div>}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={
@@ -315,9 +284,6 @@ export default function DocumentTypesPage() {
                     }>
                       {type.category}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {type.isRequired ? "Yes" : "No"}
                   </TableCell>
                   <TableCell>
                     {type.isActive ? (

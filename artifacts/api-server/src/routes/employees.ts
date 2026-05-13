@@ -65,9 +65,9 @@ router.post("/employees", async (req, res): Promise<void> => {
 router.get("/employees/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
     const [employee] = await db.select().from(employeesTable).where(eq(employeesTable.id, id));
-    if (!employee) res.status(404).json({ error: "Employee not found" }); return;
+    if (!employee) { res.status(404).json({ error: "Employee not found" }); return; }
 
     const checklist = await db
       .select({
@@ -116,14 +116,14 @@ router.get("/employees/:id", async (req, res): Promise<void> => {
 router.put("/employees/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
     const parsed = UpdateEmployeeBody.safeParse(req.body);
-    if (!parsed.success) res.status(400).json({ error: "Invalid input" }); return;
+    if (!parsed.success) { res.status(400).json({ error: "Invalid input" }); return; }
     const [updated] = await db.update(employeesTable)
       .set({ ...parsed.data, updatedAt: new Date() })
       .where(eq(employeesTable.id, id))
       .returning();
-    if (!updated) res.status(404).json({ error: "Employee not found" }); return;
+    if (!updated) { res.status(404).json({ error: "Employee not found" }); return; }
     res.json(updated);
   } catch (err) {
     req.log.error(err);
@@ -134,7 +134,7 @@ router.put("/employees/:id", async (req, res): Promise<void> => {
 router.delete("/employees/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
     await db.delete(employeesTable).where(eq(employeesTable.id, id));
     res.json({ success: true, message: "Employee deleted" });
   } catch (err) {

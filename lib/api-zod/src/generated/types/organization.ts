@@ -33,6 +33,10 @@ export interface Organization {
   tagline?: string | null;
   /** @nullable */
   adminCcEmail?: string | null;
+  /** @nullable */
+  studentEmailTemplate?: string | null;
+  /** @nullable */
+  employeeEmailTemplate?: string | null;
   createdAt: string;
   updatedAt: string;
 }

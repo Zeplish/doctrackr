@@ -41,6 +41,10 @@ export interface Organization {
   tagline?: string | null;
   /** @nullable */
   adminCcEmail?: string | null;
+  /** @nullable */
+  studentEmailTemplate?: string | null;
+  /** @nullable */
+  employeeEmailTemplate?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,6 +73,10 @@ export interface OrganizationInput {
   tagline?: string | null;
   /** @nullable */
   adminCcEmail?: string | null;
+  /** @nullable */
+  studentEmailTemplate?: string | null;
+  /** @nullable */
+  employeeEmailTemplate?: string | null;
 }
 
 export interface SmtpSettings {

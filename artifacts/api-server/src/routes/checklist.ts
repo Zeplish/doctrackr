@@ -162,7 +162,7 @@ router.patch("/checklist/bulk-update", async (req, res): Promise<void> => {
 router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
 
     const [row] = await db
       .select({ item: checklistItemsTable, docType: documentTypesTable, student: studentsTable, employee: employeesTable })
@@ -172,7 +172,7 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
       .leftJoin(employeesTable, eq(checklistItemsTable.employeeId, employeesTable.id))
       .where(eq(checklistItemsTable.id, id));
 
-    if (!row) res.status(404).json({ error: "Checklist item not found" }); return;
+    if (!row) { res.status(404).json({ error: "Checklist item not found" }); return; }
 
     const [org] = await db.select().from(organizationTable).limit(1);
     const [smtp] = await db.select().from(smtpSettingsTable).limit(1);
@@ -207,6 +207,7 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
           orgWebsite: org?.website ?? null,
           emailFooter: org?.emailFooter ?? null,
           logoUrl: org?.logoUrl ?? null,
+          customTemplate: org?.studentEmailTemplate ?? null,
         });
         const to = [s.parent1Email as string];
         if (s.parent2Email) to.push(s.parent2Email as string);
@@ -236,6 +237,7 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
           expiryDate,
           emailFooter: org?.emailFooter ?? null,
           logoUrl: org?.logoUrl ?? null,
+          customTemplate: org?.employeeEmailTemplate ?? null,
         });
         const cc = await sendReminderEmail({ transporter, smtp, org: org ?? { adminCcEmail: null }, to: [e.email], subject, html });
         ccEmail = cc;

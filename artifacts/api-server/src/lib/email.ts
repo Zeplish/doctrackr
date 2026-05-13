@@ -12,7 +12,7 @@ export async function getTransporter() {
   return nodemailer.createTransport({
     host: smtp.host,
     port: smtp.port ?? 587,
-    secure: smtp.secure,
+    secure: true,
     auth: smtp.username && smtp.password
       ? { user: smtp.username, pass: smtp.password }
       : undefined,
@@ -23,6 +23,36 @@ export async function getOrgAndSmtp() {
   const [org] = await db.select().from(organizationTable).limit(1);
   const [smtp] = await db.select().from(smtpSettingsTable).limit(1);
   return { org, smtp };
+}
+
+function applyTemplate(template: string, vars: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? `{${key}}`);
+}
+
+function wrapInHtml(body: string, orgName: string, color: string, logoUrl: string | null, emailFooter: string | null): string {
+  const escaped = body
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .split("\n")
+    .map((line) => `<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 8px;">${line || "&nbsp;"}</p>`)
+    .join("");
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="font-family:Arial,sans-serif;background-color:#f4f4f4;margin:0;padding:20px;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+    <div style="background-color:${color};padding:24px;text-align:center;">
+      ${logoUrl ? `<img src="${logoUrl}" alt="${orgName}" style="max-height:48px;display:block;margin:0 auto 12px;" />` : ""}
+      <h1 style="color:#ffffff;margin:0;font-size:22px;">${orgName}</h1>
+    </div>
+    <div style="padding:32px 24px;">${escaped}</div>
+    <div style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:16px 24px;text-align:center;">
+      <p style="color:#9ca3af;font-size:12px;margin:0;">${emailFooter || `This is an automated reminder from ${orgName}.`}</p>
+    </div>
+  </div>
+</body>
+</html>`;
 }
 
 export function buildStudentReminderEmail(params: {
@@ -38,10 +68,26 @@ export function buildStudentReminderEmail(params: {
   orgWebsite: string | null;
   emailFooter: string | null;
   logoUrl: string | null;
+  customTemplate?: string | null;
 }) {
-  const { orgName, senderName, primaryColor, studentName, documentType, expiryDate, status, orgPhone, orgEmail, orgWebsite, emailFooter, logoUrl } = params;
+  const { orgName, senderName, primaryColor, studentName, documentType, expiryDate, status, orgPhone, orgEmail, orgWebsite, emailFooter, logoUrl, customTemplate } = params;
   const color = primaryColor || "#2563eb";
   const subject = `Action Required: Updated ${documentType} Needed for ${studentName}`;
+
+  if (customTemplate) {
+    const vars: Record<string, string> = {
+      orgName,
+      senderName: senderName || orgName,
+      studentName,
+      documentType,
+      expiryDate,
+      status: status.replace("_", " "),
+    };
+    const body = applyTemplate(customTemplate, vars);
+    const html = wrapInHtml(body, orgName, color, logoUrl, emailFooter);
+    return { subject, html };
+  }
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${subject}</title></head>
@@ -91,10 +137,25 @@ export function buildEmployeeReminderEmail(params: {
   expiryDate: string;
   emailFooter: string | null;
   logoUrl: string | null;
+  customTemplate?: string | null;
 }) {
-  const { orgName, senderName, primaryColor, employeeName, documentType, expiryDate, emailFooter, logoUrl } = params;
+  const { orgName, senderName, primaryColor, employeeName, documentType, expiryDate, emailFooter, logoUrl, customTemplate } = params;
   const color = primaryColor || "#2563eb";
   const subject = `Action Required: Updated ${documentType} Needed`;
+
+  if (customTemplate) {
+    const vars: Record<string, string> = {
+      orgName,
+      senderName: senderName || orgName,
+      employeeName,
+      documentType,
+      expiryDate,
+    };
+    const body = applyTemplate(customTemplate, vars);
+    const html = wrapInHtml(body, orgName, color, logoUrl, emailFooter);
+    return { subject, html };
+  }
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${subject}</title></head>

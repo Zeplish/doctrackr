@@ -15,7 +15,6 @@ import {
   LayoutDashboard,
   GraduationCap,
   Users,
-  ClipboardCheck,
   FileText,
   Mail,
   Building2,
@@ -25,18 +24,21 @@ import {
   ChevronRight,
   LogOut,
   KeyRound,
+  MailOpen,
 } from "lucide-react";
 import { ReactNode } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/lib/auth";
 import { useLocation as useWouterLocation } from "wouter";
+import { useGetOrganization } from "@workspace/api-client-react";
 
 export function Layout({ children, title }: { children: ReactNode; title: string }) {
   const [location] = useLocation();
   const [, setLocation] = useWouterLocation();
   const isSettingsActive = location.startsWith("/settings");
   const logout = useLogout();
+  const { data: org } = useGetOrganization();
 
   const handleLogout = async () => {
     await logout.mutateAsync();
@@ -46,11 +48,14 @@ export function Layout({ children, title }: { children: ReactNode; title: string
   return (
     <SidebarProvider>
       <Sidebar>
-        <SidebarHeader className="h-16 flex items-center justify-center border-b border-sidebar-border/50 px-4">
+        <SidebarHeader className="border-b border-sidebar-border/50 px-4 py-3">
           <div className="flex items-center gap-2 w-full font-bold text-xl tracking-tight text-white">
-            <ClipboardCheck className="h-6 w-6 text-sidebar-primary" />
+            <FileText className="h-6 w-6 text-sidebar-primary" />
             <span>DocTrackr</span>
           </div>
+          {org?.name && (
+            <p className="text-xs text-white/50 mt-1 truncate">{org.name}</p>
+          )}
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
@@ -76,14 +81,6 @@ export function Layout({ children, title }: { children: ReactNode; title: string
                   <Link href="/employees" className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
                     <span>Employees</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={location.startsWith("/compliance")}>
-                  <Link href="/compliance" className="flex items-center gap-2">
-                    <ClipboardCheck className="h-4 w-4" />
-                    <span>Compliance</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -139,6 +136,12 @@ export function Layout({ children, title }: { children: ReactNode; title: string
                         <Link href="/settings/credentials" className="flex items-center gap-2">
                           <KeyRound className="h-4 w-4" />
                           <span>Credentials</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      <SidebarMenuButton asChild isActive={location === "/settings/email-templates"} size="sm">
+                        <Link href="/settings/email-templates" className="flex items-center gap-2">
+                          <MailOpen className="h-4 w-4" />
+                          <span>Email Templates</span>
                         </Link>
                       </SidebarMenuButton>
                     </div>
