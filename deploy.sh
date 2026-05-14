@@ -92,12 +92,19 @@ if [[ ! -f ".env" ]]; then
     error "You must set a real login password. Re-run the script to try again."
   fi
 
-  # Write values into .env
-  sed -i "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=${PG_PASS}/" .env
-  sed -i "s|^DATABASE_URL=.*|DATABASE_URL=postgresql://doctrackr:${PG_PASS}@db:5432/doctrackr|" .env
-  sed -i "s/^SESSION_SECRET=.*/SESSION_SECRET=${SESSION_SECRET}/" .env
-  sed -i "s/^AUTH_USERNAME=.*/AUTH_USERNAME=${AUTH_USERNAME}/" .env
-  sed -i "s/^AUTH_PASSWORD=.*/AUTH_PASSWORD=${AUTH_PASSWORD}/" .env
+  # Write .env using printf to a temp file — avoids sed breaking on special chars (/, &, etc.)
+  {
+    printf 'POSTGRES_DB=doctrackr\n'
+    printf 'POSTGRES_USER=doctrackr\n'
+    printf 'POSTGRES_PASSWORD=%s\n' "$PG_PASS"
+    printf 'DATABASE_URL=postgresql://doctrackr:%s@db:5432/doctrackr\n' "$PG_PASS"
+    printf 'SESSION_SECRET=%s\n' "$SESSION_SECRET"
+    printf 'AUTH_USERNAME=%s\n' "$AUTH_USERNAME"
+    printf 'AUTH_PASSWORD=%s\n' "$AUTH_PASSWORD"
+    printf 'NODE_ENV=production\n'
+    printf 'PORT=8080\n'
+    printf 'EXPOSE_PORT=80\n'
+  } > .env
 
   info ".env written. Keep this file safe — it contains your secrets."
 else

@@ -50,6 +50,9 @@ In Replit, open the **Shell** tab and run these commands one at a time.
 When Git asks for a password, paste the Personal Access Token from Step 1.2.
 
 ```bash
+# If the repo isn't initialised yet (run git status first to check):
+# git init && git add -A && git commit -m "initial commit"
+
 git remote add origin https://github.com/YOUR-USERNAME/doctrackr.git
 git push -u origin main
 ```
@@ -176,6 +179,8 @@ Fill in the values:
 | `AUTH_USERNAME` | Your login username for the DocTrackr app |
 | `AUTH_PASSWORD` | Your login password for the DocTrackr app |
 | `EXPOSE_PORT` | Leave as `80`, or change to `8080` if port 80 is taken |
+
+> For a complete description of every variable (including optional ones), see `DOCKER.md`.
 
 Save and exit nano: `Ctrl+O` then `Enter` then `Ctrl+X`.
 
