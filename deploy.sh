@@ -64,8 +64,22 @@ if [[ ! -f ".env" ]]; then
   cp .env.example .env
 
   echo ""
-  info "Please set your secrets. Press Enter to keep the default shown in brackets."
+  info "Set your secrets below. These are saved in .env — keep that file safe."
   echo ""
+
+  prompt "Database password (strong random string recommended):"
+  read -rsp "POSTGRES_PASSWORD: " PG_PASS
+  echo ""
+  if [[ -z "$PG_PASS" || "$PG_PASS" == "changeme" ]]; then
+    error "You must set a real database password. Re-run the script to try again."
+  fi
+
+  prompt "Session secret (a long random string — e.g. paste output of: openssl rand -hex 32):"
+  read -rsp "SESSION_SECRET: " SESSION_SECRET
+  echo ""
+  if [[ -z "$SESSION_SECRET" || "$SESSION_SECRET" == "replace-with-a-long-random-string" ]]; then
+    error "You must set a real session secret. Re-run the script to try again."
+  fi
 
   prompt "Admin login username [admin]:"
   read -rp "AUTH_USERNAME: " AUTH_USERNAME
@@ -75,12 +89,8 @@ if [[ ! -f ".env" ]]; then
   read -rsp "AUTH_PASSWORD: " AUTH_PASSWORD
   echo ""
   if [[ -z "$AUTH_PASSWORD" || "$AUTH_PASSWORD" == "changeme" ]]; then
-    error "You must set a real password. Re-run the script to try again."
+    error "You must set a real login password. Re-run the script to try again."
   fi
-
-  # Generate strong random secrets automatically
-  PG_PASS=$(openssl rand -hex 20 2>/dev/null || LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 40)
-  SESSION_SECRET=$(openssl rand -hex 32 2>/dev/null || LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 64)
 
   # Write values into .env
   sed -i "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=${PG_PASS}/" .env
@@ -89,7 +99,6 @@ if [[ ! -f ".env" ]]; then
   sed -i "s/^AUTH_USERNAME=.*/AUTH_USERNAME=${AUTH_USERNAME}/" .env
   sed -i "s/^AUTH_PASSWORD=.*/AUTH_PASSWORD=${AUTH_PASSWORD}/" .env
 
-  info "Generated a random database password and session secret automatically."
   info ".env written. Keep this file safe — it contains your secrets."
 else
   warn ".env already exists — skipping configuration. Edit it manually if needed."

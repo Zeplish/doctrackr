@@ -38,7 +38,13 @@ You need this to push code from Replit to GitHub.
 5. Click **Create repository**.
 6. Copy the HTTPS URL shown (e.g. `https://github.com/your-username/doctrackr.git`).
 
-### Step 1.4 — Push the code from Replit to GitHub
+### Step 1.4 — Get the code out of Replit
+
+You have two ways to do this. Pick whichever feels easier.
+
+---
+
+#### Method A — Push directly from Replit Shell to GitHub (simplest)
 
 In Replit, open the **Shell** tab and run these commands one at a time.
 When Git asks for a password, paste the Personal Access Token from Step 1.2.
@@ -48,14 +54,49 @@ git remote add origin https://github.com/YOUR-USERNAME/doctrackr.git
 git push -u origin main
 ```
 
-If the remote already exists you may see an error — run this instead:
+If you see an error saying the remote already exists, use this instead:
 
 ```bash
 git remote set-url origin https://github.com/YOUR-USERNAME/doctrackr.git
 git push -u origin main
 ```
 
-Your code is now on GitHub. You can verify by refreshing the repository page.
+Your code is now on GitHub. Verify by refreshing the repository page on GitHub.
+
+---
+
+#### Method B — Download a bundle file, then push from your own computer
+
+Use this if Replit's Shell cannot reach GitHub (e.g. network restrictions).
+
+**On Replit — create the bundle:**
+
+Open the Replit **Shell** tab and run:
+
+```bash
+git bundle create doctrackr.bundle --all
+```
+
+This creates a single file `doctrackr.bundle` in the project root.  
+Download it: in the Replit **Files** panel on the left, right-click `doctrackr.bundle` → **Download**.
+
+**On your own computer — push to GitHub:**
+
+Open a terminal on your computer (Terminal on Mac/Linux, Git Bash on Windows).
+
+```bash
+# Clone from the bundle into a local folder
+git clone doctrackr.bundle doctrackr
+cd doctrackr
+
+# Point it at your GitHub repository
+git remote set-url origin https://github.com/YOUR-USERNAME/doctrackr.git
+
+# Push to GitHub (use your Personal Access Token as the password when prompted)
+git push -u origin main
+```
+
+Your code is now on GitHub.
 
 ---
 
