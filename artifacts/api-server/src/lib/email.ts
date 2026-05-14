@@ -9,13 +9,17 @@ export async function getTransporter() {
   if (!smtp || !smtp.host) {
     throw new Error("SMTP not configured");
   }
+  const port = smtp.port ?? 587;
   return nodemailer.createTransport({
     host: smtp.host,
-    port: smtp.port ?? 587,
-    secure: true,
+    // port: smtp.port ?? 587,
+    // secure: true,
+    port,
+    secure: port === 465,
     auth: smtp.username && smtp.password
       ? { user: smtp.username, pass: smtp.password }
       : undefined,
+    tls: { rejectUnauthorized: false },
   });
 }
 
