@@ -24,6 +24,6 @@ RUN pnpm --filter @workspace/doctrackr run build
 
 FROM nginx:alpine AS runner
 COPY artifacts/doctrackr/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/artifacts/doctrackr/dist /usr/share/nginx/html
+COPY --from=build /app/artifacts/doctrackr/dist/public /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
