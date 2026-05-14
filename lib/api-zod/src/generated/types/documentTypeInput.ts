@@ -14,4 +14,6 @@ export interface DocumentTypeInput {
   description?: string | null;
   isRequired: boolean;
   isActive?: boolean;
+  /** @nullable */
+  templateFormUrl?: string | null;
 }

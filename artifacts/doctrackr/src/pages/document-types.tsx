@@ -20,7 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, ExternalLink } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +46,7 @@ const docTypeSchema = z.object({
   name: z.string().min(1, "Name is required"),
   category: z.enum(["student", "employee", "both"]),
   isActive: z.boolean().default(true),
+  templateFormUrl: z.union([z.string().url("Must be a valid URL"), z.literal("")]).nullable().optional(),
 });
 
 type DocTypeFormValues = z.infer<typeof docTypeSchema>;
@@ -75,12 +76,18 @@ export default function DocumentTypesPage() {
       name: "",
       category: "student",
       isActive: true,
+      templateFormUrl: "",
     }
+  });
+
+  const normalizeFormUrl = (values: DocTypeFormValues) => ({
+    ...values,
+    templateFormUrl: values.templateFormUrl?.trim() || null,
   });
 
   const onAddSubmit = async (values: DocTypeFormValues) => {
     try {
-      await createDocType.mutateAsync({ data: values as any });
+      await createDocType.mutateAsync({ data: normalizeFormUrl(values) as any });
       qc.invalidateQueries({ queryKey: getListDocumentTypesQueryKey() });
       toast.success("Document type created successfully");
       setIsAddOpen(false);
@@ -93,7 +100,7 @@ export default function DocumentTypesPage() {
   const onEditSubmit = async (values: DocTypeFormValues) => {
     if (!editId) return;
     try {
-      await updateDocType.mutateAsync({ id: editId!, data: values as any });
+      await updateDocType.mutateAsync({ id: editId!, data: normalizeFormUrl(values) as any });
       qc.invalidateQueries({ queryKey: getListDocumentTypesQueryKey() });
       toast.success("Document type updated successfully");
       setEditId(null);
@@ -130,6 +137,7 @@ export default function DocumentTypesPage() {
       name: type.name,
       category: type.category,
       isActive: type.isActive,
+      templateFormUrl: type.templateFormUrl ?? "",
     });
     setEditId(type.id);
   };
@@ -154,7 +162,9 @@ export default function DocumentTypesPage() {
 
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => form.reset()}><Plus className="h-4 w-4 mr-2" /> Add Document Type</Button>
+              <Button onClick={() => form.reset({ name: "", category: "student", isActive: true, templateFormUrl: "" })}>
+                <Plus className="h-4 w-4 mr-2" /> Add Document Type
+              </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -179,6 +189,23 @@ export default function DocumentTypesPage() {
                       <FormMessage />
                     </FormItem>
                   )} />
+                  <FormField control={form.control} name="templateFormUrl" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Form Download URL</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value ?? ""}
+                          placeholder="https://... (optional)"
+                          type="url"
+                        />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        Optional. If provided, parents/staff will receive a direct download link in reminder emails.
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                   <div className="flex justify-end pt-4">
                     <Button type="submit" disabled={createDocType.isPending}>Save</Button>
                   </div>
@@ -199,7 +226,7 @@ export default function DocumentTypesPage() {
                   <FormField control={form.control} name="category" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
                         <SelectContent>
                           <SelectItem value="student">Student</SelectItem>
@@ -207,6 +234,23 @@ export default function DocumentTypesPage() {
                           <SelectItem value="both">Both</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="templateFormUrl" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Form Download URL</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value ?? ""}
+                          placeholder="https://... (optional)"
+                          type="url"
+                        />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        Optional. If provided, parents/staff will receive a direct download link in reminder emails.
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -250,6 +294,7 @@ export default function DocumentTypesPage() {
             <TableRow>
               <TableHead>Document Name</TableHead>
               <TableHead>Category</TableHead>
+              <TableHead>Form URL</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -260,13 +305,14 @@ export default function DocumentTypesPage() {
                 <TableRow key={i}>
                   <TableCell><Skeleton className="h-5 w-40" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                   <TableCell><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
                 </TableRow>
               ))
             ) : docTypes?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   No document types found
                 </TableCell>
               </TableRow>
@@ -284,6 +330,21 @@ export default function DocumentTypesPage() {
                     }>
                       {type.category}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {type.templateFormUrl ? (
+                      <a
+                        href={type.templateFormUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        View form
+                      </a>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     {type.isActive ? (

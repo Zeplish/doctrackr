@@ -62,8 +62,9 @@ export function buildStudentReminderEmail(params: {
   emailFooter: string | null;
   logoUrl: string | null;
   customTemplate?: string | null;
+  formUrl?: string | null;
 }) {
-  const { orgName, senderName, primaryColor, studentName, documentType, expiryDate, status, orgPhone, orgEmail, orgWebsite, emailFooter, logoUrl, customTemplate } = params;
+  const { orgName, senderName, primaryColor, studentName, documentType, expiryDate, status, orgPhone, orgEmail, orgWebsite, emailFooter, logoUrl, customTemplate, formUrl } = params;
   const color = primaryColor || "#2563eb";
   const subject = `Action Required: Updated ${documentType} Needed for ${studentName}`;
 
@@ -78,11 +79,21 @@ export function buildStudentReminderEmail(params: {
       orgPhone: orgPhone || "",
       orgEmail: orgEmail || "",
       orgWebsite: orgWebsite || "",
+      formUrl: formUrl || "",
     };
     const body = applyTemplate(customTemplate, vars);
     const html = wrapInHtml(body, orgName, color, logoUrl, emailFooter);
     return { subject, html };
   }
+
+  const downloadSection = formUrl ? `
+      <div style="background-color:#f0f7ff;border:1px solid #bfdbfe;border-radius:8px;padding:20px;margin:24px 0;text-align:center;">
+        <p style="color:#1e40af;font-size:15px;font-weight:600;margin:0 0 12px;">Download Required Form</p>
+        <a href="${formUrl}" style="display:inline-block;background-color:${color};color:#ffffff;text-decoration:none;padding:10px 24px;border-radius:6px;font-size:14px;font-weight:600;">Download ${documentType}</a>
+        <p style="color:#374151;font-size:13px;margin:12px 0 0;">Please download, print, complete, and return this form to the daycare.</p>
+      </div>` : "";
+
+  const plainTextFormNote = formUrl ? `\n\nDownload the required form here: ${formUrl}\nPlease download, print, complete, and return this form to the daycare.\n` : "";
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -97,8 +108,7 @@ export function buildStudentReminderEmail(params: {
       <p style="color: #374151; font-size: 16px;">Dear Parent/Guardian,</p>
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">We hope you are doing well.</p>
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">This is a friendly reminder from <strong>${orgName}</strong> that your child, <strong>${studentName}</strong>'s <strong>${documentType}</strong> is scheduled to expire on <strong>${expiryDate}</strong>.</p>
-      <p style="color: #374151; font-size: 15px; line-height: 1.6;">To help us maintain updated records and ensure uninterrupted compliance, we kindly request that you complete and submit an updated copy at your earliest convenience.</p>
-      <p style="color: #374151; font-size: 15px; line-height: 1.6;">If a blank form is attached, kindly print, complete, and return it to the daycare.</p>
+      <p style="color: #374151; font-size: 15px; line-height: 1.6;">To help us maintain updated records and ensure uninterrupted compliance, we kindly request that you complete and submit an updated copy at your earliest convenience.</p>${plainTextFormNote ? "" : "\n      <p style=\"color: #374151; font-size: 15px; line-height: 1.6;\">If a blank form is attached, kindly print, complete, and return it to the daycare.</p>"}
       <p style="color: #6b7280; font-size: 14px; font-style: italic;">If you have already submitted the updated document, please disregard this message.</p>
       <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 24px 0;">
         <table style="width: 100%; border-collapse: collapse;">
@@ -107,7 +117,7 @@ export function buildStudentReminderEmail(params: {
           <tr><td style="padding: 6px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Expiry Date</td><td style="padding: 6px 0; color: #111827; font-size: 14px;">${expiryDate}</td></tr>
           <tr><td style="padding: 6px 0; color: #6b7280; font-size: 14px; font-weight: 600;">Status</td><td style="padding: 6px 0;"><span style="background-color: #fee2e2; color: #dc2626; padding: 2px 10px; border-radius: 12px; font-size: 13px; font-weight: 600;">${status.replace("_", " ").toUpperCase()}</span></td></tr>
         </table>
-      </div>
+      </div>${downloadSection}
       <p style="color: #374151; font-size: 15px; margin-top: 24px;">Warm regards,</p>
       <p style="color: #374151; font-size: 15px; margin: 0;"><strong>${senderName || orgName}</strong></p>
       <p style="color: #374151; font-size: 14px; margin: 4px 0;">${orgName}</p>
@@ -134,8 +144,9 @@ export function buildEmployeeReminderEmail(params: {
   emailFooter: string | null;
   logoUrl: string | null;
   customTemplate?: string | null;
+  formUrl?: string | null;
 }) {
-  const { orgName, senderName, primaryColor, employeeName, documentType, expiryDate, emailFooter, logoUrl, customTemplate } = params;
+  const { orgName, senderName, primaryColor, employeeName, documentType, expiryDate, emailFooter, logoUrl, customTemplate, formUrl } = params;
   const color = primaryColor || "#2563eb";
   const subject = `Action Required: Updated ${documentType} Needed`;
 
@@ -146,11 +157,18 @@ export function buildEmployeeReminderEmail(params: {
       employeeName,
       documentType,
       expiryDate,
+      formUrl: formUrl || "",
     };
     const body = applyTemplate(customTemplate, vars);
     const html = wrapInHtml(body, orgName, color, logoUrl, emailFooter);
     return { subject, html };
   }
+
+  const downloadSection = formUrl ? `
+      <div style="margin:20px 0;">
+        <a href="${formUrl}" style="color:#2563eb;text-decoration:underline;font-size:14px;font-weight:600;">Download ${documentType} Form</a>
+        <p style="color:#6b7280;font-size:13px;margin:4px 0 0;">Please complete and return this form as soon as possible.</p>
+      </div>` : "";
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -164,7 +182,7 @@ export function buildEmployeeReminderEmail(params: {
     <div style="padding: 32px 24px;">
       <p style="color: #374151; font-size: 16px;">Dear ${employeeName},</p>
       <p style="color: #374151; font-size: 15px; line-height: 1.6;">This is a reminder that your <strong>${documentType}</strong> is scheduled to expire on <strong>${expiryDate}</strong>.</p>
-      <p style="color: #374151; font-size: 15px; line-height: 1.6;">Please complete and submit an updated copy at your earliest convenience so records remain current.</p>
+      <p style="color: #374151; font-size: 15px; line-height: 1.6;">Please complete and submit an updated copy at your earliest convenience so records remain current.</p>${downloadSection}
       <p style="color: #6b7280; font-size: 14px; font-style: italic;">If you have already submitted the updated document, please disregard this reminder.</p>
       <p style="color: #374151; font-size: 15px; margin-top: 24px;">Regards,</p>
       <p style="color: #374151; font-size: 15px; margin: 0;"><strong>${senderName || orgName}</strong></p>

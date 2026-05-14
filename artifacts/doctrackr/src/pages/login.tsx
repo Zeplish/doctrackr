@@ -4,7 +4,7 @@ import { useLogin } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileText, Bell, ShieldCheck, BarChart3, Users } from "lucide-react";
+import { FileText, Bell, BarChart3, Users } from "lucide-react";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -116,12 +116,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 flex items-center gap-2 rounded-lg border border-muted bg-muted/40 px-3 py-2.5">
-            <ShieldCheck className="h-4 w-4 text-muted-foreground shrink-0" />
-            <p className="text-xs text-muted-foreground">
-              Default credentials: <strong>admin</strong> / <strong>changeme</strong>
-            </p>
-          </div>
         </div>
       </div>
     </div>

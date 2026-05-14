@@ -462,6 +462,7 @@ export const CreateDocumentTypeBody = zod.object({
   description: zod.string().nullish(),
   isRequired: zod.boolean(),
   isActive: zod.boolean().optional(),
+  templateFormUrl: zod.string().nullish(),
 });
 
 /**
@@ -497,6 +498,7 @@ export const UpdateDocumentTypeBody = zod.object({
   description: zod.string().nullish(),
   isRequired: zod.boolean(),
   isActive: zod.boolean().optional(),
+  templateFormUrl: zod.string().nullish(),
 });
 
 export const UpdateDocumentTypeResponse = zod.object({

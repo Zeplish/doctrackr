@@ -1181,6 +1181,8 @@ components:
           type: boolean
         isActive:
           type: boolean
+        templateFormUrl:
+          type: ["string", "null"]
       required:
         - name
         - category

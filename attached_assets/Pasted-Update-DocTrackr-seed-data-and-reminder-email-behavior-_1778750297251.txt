@@ -1,0 +1,140 @@
+Update DocTrackr seed data and reminder email behavior.
+
+==================================================
+1. DOCUMENT TYPE MODEL UPDATE
+==================================================
+
+Document types should support an optional external form/download URL.
+
+Add field to DocumentType:
+
+formUrl String? / nullable
+
+Purpose:
+For student compliance forms, parents should receive direct download links in reminder emails.
+
+Do NOT store completed documents.
+
+This is only for blank form download links.
+
+==================================================
+2. SEED STUDENT DOCUMENT TYPES
+==================================================
+
+Seed the following STUDENT document types:
+
+1. Medical Examination Form
+Category: STUDENT
+isActive: true
+formUrl:
+https://drive.google.com/uc?export=download&id=1L0c_xGLtSLmVkTdlUSqjnWzuu3QpMuJx
+
+2. Daycare Cumulative Health Record
+Category: STUDENT
+isActive: true
+formUrl:
+https://drive.google.com/uc?export=download&id=1zO2iSQ65T93ygY22-MGHWbFmYqeAkUaY
+
+When a new student is created, these two document types should automatically appear in the student compliance checklist.
+
+==================================================
+3. SEED EMPLOYEE DOCUMENT TYPES
+==================================================
+
+Seed these EMPLOYEE document types with:
+
+category: EMPLOYEE
+isActive: true
+
+List:
+
+- Resume
+- 3 Reference Letters
+- State Central Registry (SCR) Clearance
+- DOH Fingerprint Clearance
+- DOE Fingerprint Clearance
+- DOH Clearance Letter
+- DOH Approval Request
+- Diploma
+- Medical Form
+- Child Abuse Identification & Reporting
+- Infection Control
+- Foundation in Health and Safety
+- Shaken Baby Syndrome Training
+- Sudden Infant Death Syndrome (SIDS) Training
+- Behavior Management Training
+- Family Engagement
+- Supervision of Children
+- Preventing Lead Poisoning
+- Autoinjector
+- Food Handler Certification
+- Obesity Prevention
+- Emergency Preparedness
+- Transportation
+- Expulsion & Suspension Prevention Strategies
+- Legally Exempt Child Care Training
+- Supporting Language Development: Birth to 5
+- ACEs & Trauma-Informed Practice
+- Supporting Children with Special Needs
+- CPR & First Aid Certification
+- Sexual Harassment Training
+- W-2 Form
+
+==================================================
+4. EMAIL TEMPLATE UPDATE FOR PARENTS
+==================================================
+
+For STUDENT reminder emails only:
+
+If the document type has formUrl, include a clear download section in the HTML email.
+
+Example section:
+
+"Download Required Form"
+
+Button:
+Download [Document Name]
+
+Button link:
+[formUrl]
+
+Supporting text:
+Please download, print, complete, and return this form to the daycare.
+
+This should appear prominently in the email so parents do not need to ask the admin team for the form.
+
+Also include the same URL in the plain text fallback email.
+
+==================================================
+5. EMAIL TEMPLATE UPDATE FOR EMPLOYEES
+==================================================
+
+Employee reminder emails do not need formUrl buttons unless a formUrl exists.
+
+If formUrl exists for an employee document type in the future, include the link.
+
+==================================================
+6. ADMIN UI UPDATE
+==================================================
+
+In Document Types admin screen, add/edit field:
+
+Form Download URL
+
+Rules:
+- Optional
+- Validate URL format
+- Show only if provided
+- Display in document type details/table as a clickable link
+
+==================================================
+7. IMPORTANT
+==================================================
+
+Do not upload or store completed documents.
+
+Do not require file upload for student forms.
+
+Use external formUrl links in emails.
+
+Keep the system HIPAA-conscious and compliance-focused.

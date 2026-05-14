@@ -208,6 +208,7 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
           emailFooter: org?.emailFooter ?? null,
           logoUrl: org?.logoUrl ?? null,
           customTemplate: org?.studentEmailTemplate ?? null,
+          formUrl: docType.templateFormUrl ?? null,
         });
         const to = [s.parent1Email as string];
         if (s.parent2Email) to.push(s.parent2Email as string);
@@ -238,6 +239,7 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
           emailFooter: org?.emailFooter ?? null,
           logoUrl: org?.logoUrl ?? null,
           customTemplate: org?.employeeEmailTemplate ?? null,
+          formUrl: docType.templateFormUrl ?? null,
         });
         const cc = await sendReminderEmail({ transporter, smtp, org: org ?? { adminCcEmail: null }, to: [e.email], subject, html });
         ccEmail = cc;
