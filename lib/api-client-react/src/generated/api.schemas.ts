@@ -148,8 +148,6 @@ export interface Student {
   /** @nullable */
   classRoom?: string | null;
   status: StudentStatus;
-  /** @nullable */
-  notes?: string | null;
   parent1Name: string;
   parent1Email: string;
   /** @nullable */
@@ -179,8 +177,6 @@ export interface StudentInput {
   /** @nullable */
   classRoom?: string | null;
   status?: StudentInputStatus;
-  /** @nullable */
-  notes?: string | null;
   parent1Name: string;
   parent1Email: string;
   /** @nullable */
@@ -245,8 +241,6 @@ export interface ChecklistItem {
   expiryDate?: string | null;
   status: ChecklistItemStatus;
   /** @nullable */
-  notes?: string | null;
-  /** @nullable */
   lastReminderSentAt?: string | null;
   /** @nullable */
   nextReminderDueAt?: string | null;
@@ -264,8 +258,6 @@ export interface StudentDetail {
   /** @nullable */
   classRoom?: string | null;
   status: StudentDetailStatus;
-  /** @nullable */
-  notes?: string | null;
   parent1Name: string;
   parent1Email: string;
   /** @nullable */
@@ -298,8 +290,6 @@ export interface Employee {
   /** @nullable */
   phone?: string | null;
   status: EmployeeStatus;
-  /** @nullable */
-  notes?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -320,8 +310,6 @@ export interface EmployeeInput {
   /** @nullable */
   phone?: string | null;
   status?: EmployeeInputStatus;
-  /** @nullable */
-  notes?: string | null;
 }
 
 export type EmployeeDetailStatus =
@@ -341,8 +329,6 @@ export interface EmployeeDetail {
   /** @nullable */
   phone?: string | null;
   status: EmployeeDetailStatus;
-  /** @nullable */
-  notes?: string | null;
   createdAt: string;
   updatedAt: string;
   checklistItems: ChecklistItem[];
@@ -386,7 +372,7 @@ export interface DocumentTypeInput {
   category: DocumentTypeInputCategory;
   /** @nullable */
   description?: string | null;
-  isRequired: boolean;
+  isRequired?: boolean;
   isActive?: boolean;
   /** @nullable */
   templateFormUrl?: string | null;
@@ -395,16 +381,12 @@ export interface DocumentTypeInput {
 export interface ChecklistItemUpdate {
   /** @nullable */
   expiryDate?: string | null;
-  /** @nullable */
-  notes?: string | null;
 }
 
 export type BulkChecklistUpdateItemsItem = {
   id: number;
   /** @nullable */
   expiryDate?: string | null;
-  /** @nullable */
-  notes?: string | null;
 };
 
 export interface BulkChecklistUpdate {

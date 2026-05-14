@@ -16,8 +16,6 @@ export interface Employee {
   /** @nullable */
   phone?: string | null;
   status: EmployeeStatus;
-  /** @nullable */
-  notes?: string | null;
   createdAt: string;
   updatedAt: string;
 }

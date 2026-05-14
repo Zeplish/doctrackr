@@ -8,7 +8,6 @@ export const studentsTable = pgTable("students", {
   dateOfBirth: text("date_of_birth"),
   classRoom: text("class_room"),
   status: text("status").notNull().default("active"),
-  notes: text("notes"),
   parent1Name: text("parent1_name").notNull(),
   parent1Email: text("parent1_email").notNull(),
   parent1Phone: text("parent1_phone"),

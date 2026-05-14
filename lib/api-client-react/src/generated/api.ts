@@ -2289,7 +2289,7 @@ export function useGetChecklistItem<
 }
 
 /**
- * @summary Update checklist item (expiry date, notes)
+ * @summary Update checklist item expiry date
  */
 export const getUpdateChecklistItemUrl = (id: number) => {
   return `/api/checklist/${id}`;
@@ -2353,7 +2353,7 @@ export type UpdateChecklistItemMutationBody = BodyType<ChecklistItemUpdate>;
 export type UpdateChecklistItemMutationError = ErrorType<unknown>;
 
 /**
- * @summary Update checklist item (expiry date, notes)
+ * @summary Update checklist item expiry date
  */
 export const useUpdateChecklistItem = <
   TError = ErrorType<unknown>,

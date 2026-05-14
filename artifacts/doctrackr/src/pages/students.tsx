@@ -40,14 +40,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
 
 const studentSchema = z.object({
   fullName: z.string().min(1, "Name is required"),
   dateOfBirth: z.string().nullable().optional(),
   classRoom: z.string().nullable().optional(),
   status: z.enum(["active", "inactive"]),
-  notes: z.string().nullable().optional(),
   parent1Name: z.string().min(1, "Parent 1 name is required"),
   parent1Email: z.string().email("Invalid email address").min(1, "Parent 1 email is required"),
   parent1Phone: z.string().nullable().optional(),
@@ -79,7 +77,6 @@ export default function StudentsPage() {
       dateOfBirth: "",
       classRoom: "",
       status: "active",
-      notes: "",
       parent1Name: "",
       parent1Email: "",
       parent1Phone: "",
@@ -132,7 +129,6 @@ export default function StudentsPage() {
       dateOfBirth: student.dateOfBirth || "",
       classRoom: student.classRoom || "",
       status: student.status,
-      notes: student.notes || "",
       parent1Name: student.parent1Name,
       parent1Email: student.parent1Email,
       parent1Phone: student.parent1Phone || "",
@@ -229,10 +225,6 @@ export default function StudentsPage() {
                     )} />
                   </div>
                 </div>
-
-                <FormField control={form.control} name="notes" render={({ field }) => (
-                  <FormItem><FormLabel>Notes</FormLabel><FormControl><Textarea {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
-                )} />
                 
                 <div className="flex justify-end pt-4">
                   <Button type="submit" disabled={createStudent.isPending}>Save Student</Button>

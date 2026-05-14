@@ -40,7 +40,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
 
 const employeeSchema = z.object({
   fullName: z.string().min(1, "Name is required"),
@@ -48,7 +47,6 @@ const employeeSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().nullable().optional(),
   status: z.enum(["active", "inactive"]),
-  notes: z.string().nullable().optional(),
 });
 
 type EmployeeFormValues = z.infer<typeof employeeSchema>;
@@ -75,7 +73,6 @@ export default function EmployeesPage() {
       email: "",
       phone: "",
       status: "active",
-      notes: "",
     }
   });
 
@@ -123,7 +120,6 @@ export default function EmployeesPage() {
       email: employee.email,
       phone: employee.phone || "",
       status: employee.status,
-      notes: employee.notes || "",
     });
     setEditId(employee.id);
   };
@@ -189,9 +185,6 @@ export default function EmployeesPage() {
                     <FormItem><FormLabel>Phone</FormLabel><FormControl><Input {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
-                <FormField control={form.control} name="notes" render={({ field }) => (
-                  <FormItem><FormLabel>Notes</FormLabel><FormControl><Textarea {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
-                )} />
                 <div className="flex justify-end pt-4">
                   <Button type="submit" disabled={createEmployee.isPending}>Save Employee</Button>
                 </div>
@@ -232,9 +225,6 @@ export default function EmployeesPage() {
                     <FormItem><FormLabel>Phone</FormLabel><FormControl><Input {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
-                <FormField control={form.control} name="notes" render={({ field }) => (
-                  <FormItem><FormLabel>Notes</FormLabel><FormControl><Textarea {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
-                )} />
                 <div className="flex justify-end pt-4">
                   <Button type="submit" disabled={updateEmployee.isPending}>Update Employee</Button>
                 </div>

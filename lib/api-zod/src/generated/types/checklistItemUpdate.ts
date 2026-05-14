@@ -9,6 +9,4 @@
 export interface ChecklistItemUpdate {
   /** @nullable */
   expiryDate?: string | null;
-  /** @nullable */
-  notes?: string | null;
 }

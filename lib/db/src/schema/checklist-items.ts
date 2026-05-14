@@ -12,7 +12,6 @@ export const checklistItemsTable = pgTable("checklist_items", {
   employeeId: integer("employee_id").references(() => employeesTable.id, { onDelete: "cascade" }),
   documentTypeId: integer("document_type_id").notNull().references(() => documentTypesTable.id),
   expiryDate: text("expiry_date"), // ISO date string
-  notes: text("notes"),
   lastReminderSentAt: timestamp("last_reminder_sent_at", { withTimezone: true }),
   nextReminderDueAt: timestamp("next_reminder_due_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

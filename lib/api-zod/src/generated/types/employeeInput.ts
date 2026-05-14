@@ -15,6 +15,4 @@ export interface EmployeeInput {
   /** @nullable */
   phone?: string | null;
   status?: EmployeeInputStatus;
-  /** @nullable */
-  notes?: string | null;
 }

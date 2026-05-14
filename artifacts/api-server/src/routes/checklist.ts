@@ -31,7 +31,6 @@ async function buildChecklistItem(item: Record<string, unknown>, student: Record
     expiryDate,
     status: computeDocumentStatus(expiryDate),
     daysUntilExpiry: computeDaysUntilExpiry(expiryDate),
-    notes: item.notes ?? null,
     lastReminderSentAt: item.lastReminderSentAt ? (item.lastReminderSentAt as Date).toISOString() : null,
     nextReminderDueAt: item.nextReminderDueAt ? (item.nextReminderDueAt as Date).toISOString() : null,
     createdAt: (item.createdAt as Date).toISOString(),
@@ -83,52 +82,6 @@ router.get("/checklist", async (req, res): Promise<void> => {
   }
 });
 
-router.get("/checklist/:id", async (req, res): Promise<void> => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
-    const [row] = await db
-      .select({ item: checklistItemsTable, docType: documentTypesTable, student: studentsTable, employee: employeesTable })
-      .from(checklistItemsTable)
-      .innerJoin(documentTypesTable, eq(checklistItemsTable.documentTypeId, documentTypesTable.id))
-      .leftJoin(studentsTable, eq(checklistItemsTable.studentId, studentsTable.id))
-      .leftJoin(employeesTable, eq(checklistItemsTable.employeeId, employeesTable.id))
-      .where(eq(checklistItemsTable.id, id));
-    if (!row) res.status(404).json({ error: "Checklist item not found" }); return;
-    const item = await buildChecklistItem(row.item as unknown as Record<string, unknown>, row.student as unknown as Record<string, unknown> | null, row.employee as unknown as Record<string, unknown> | null, row.docType as unknown as Record<string, unknown>);
-    res.json(item);
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-router.patch("/checklist/:id", async (req, res): Promise<void> => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) res.status(400).json({ error: "Invalid ID" }); return;
-    const parsed = UpdateChecklistItemBody.safeParse(req.body);
-    if (!parsed.success) res.status(400).json({ error: "Invalid input" }); return;
-    const [updated] = await db.update(checklistItemsTable)
-      .set({ ...parsed.data, updatedAt: new Date() })
-      .where(eq(checklistItemsTable.id, id))
-      .returning();
-    if (!updated) res.status(404).json({ error: "Checklist item not found" }); return;
-    const [row] = await db
-      .select({ item: checklistItemsTable, docType: documentTypesTable, student: studentsTable, employee: employeesTable })
-      .from(checklistItemsTable)
-      .innerJoin(documentTypesTable, eq(checklistItemsTable.documentTypeId, documentTypesTable.id))
-      .leftJoin(studentsTable, eq(checklistItemsTable.studentId, studentsTable.id))
-      .leftJoin(employeesTable, eq(checklistItemsTable.employeeId, employeesTable.id))
-      .where(eq(checklistItemsTable.id, id));
-    const item = await buildChecklistItem(row.item as unknown as Record<string, unknown>, row.student as unknown as Record<string, unknown> | null, row.employee as unknown as Record<string, unknown> | null, row.docType as unknown as Record<string, unknown>);
-    res.json(item);
-  } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
 router.patch("/checklist/bulk-update", async (req, res): Promise<void> => {
   try {
     const parsed = BulkUpdateChecklistItemsBody.safeParse(req.body);
@@ -136,7 +89,7 @@ router.patch("/checklist/bulk-update", async (req, res): Promise<void> => {
     const updated = [];
     for (const item of parsed.data!.items) {
       const [upd] = await db.update(checklistItemsTable)
-        .set({ expiryDate: item.expiryDate, notes: item.notes, updatedAt: new Date() })
+        .set({ expiryDate: item.expiryDate, updatedAt: new Date() })
         .where(eq(checklistItemsTable.id, item.id))
         .returning();
       if (upd) {
@@ -153,6 +106,52 @@ router.patch("/checklist/bulk-update", async (req, res): Promise<void> => {
       }
     }
     res.json(updated);
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/checklist/:id", async (req, res): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
+    const [row] = await db
+      .select({ item: checklistItemsTable, docType: documentTypesTable, student: studentsTable, employee: employeesTable })
+      .from(checklistItemsTable)
+      .innerJoin(documentTypesTable, eq(checklistItemsTable.documentTypeId, documentTypesTable.id))
+      .leftJoin(studentsTable, eq(checklistItemsTable.studentId, studentsTable.id))
+      .leftJoin(employeesTable, eq(checklistItemsTable.employeeId, employeesTable.id))
+      .where(eq(checklistItemsTable.id, id));
+    if (!row) { res.status(404).json({ error: "Checklist item not found" }); return; }
+    const item = await buildChecklistItem(row.item as unknown as Record<string, unknown>, row.student as unknown as Record<string, unknown> | null, row.employee as unknown as Record<string, unknown> | null, row.docType as unknown as Record<string, unknown>);
+    res.json(item);
+  } catch (err) {
+    req.log.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.patch("/checklist/:id", async (req, res): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
+    const parsed = UpdateChecklistItemBody.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: "Invalid input" }); return; }
+    const [updated] = await db.update(checklistItemsTable)
+      .set({ ...parsed.data, updatedAt: new Date() })
+      .where(eq(checklistItemsTable.id, id))
+      .returning();
+    if (!updated) { res.status(404).json({ error: "Checklist item not found" }); return; }
+    const [row] = await db
+      .select({ item: checklistItemsTable, docType: documentTypesTable, student: studentsTable, employee: employeesTable })
+      .from(checklistItemsTable)
+      .innerJoin(documentTypesTable, eq(checklistItemsTable.documentTypeId, documentTypesTable.id))
+      .leftJoin(studentsTable, eq(checklistItemsTable.studentId, studentsTable.id))
+      .leftJoin(employeesTable, eq(checklistItemsTable.employeeId, employeesTable.id))
+      .where(eq(checklistItemsTable.id, id));
+    const item = await buildChecklistItem(row.item as unknown as Record<string, unknown>, row.student as unknown as Record<string, unknown> | null, row.employee as unknown as Record<string, unknown> | null, row.docType as unknown as Record<string, unknown>);
+    res.json(item);
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Internal server error" });

@@ -79,7 +79,6 @@ router.get("/employees/:id", async (req, res): Promise<void> => {
         documentTypeCategory: documentTypesTable.category,
         templateFormUrl: documentTypesTable.templateFormUrl,
         expiryDate: checklistItemsTable.expiryDate,
-        notes: checklistItemsTable.notes,
         lastReminderSentAt: checklistItemsTable.lastReminderSentAt,
         nextReminderDueAt: checklistItemsTable.nextReminderDueAt,
         createdAt: checklistItemsTable.createdAt,

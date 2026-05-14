@@ -15,8 +15,6 @@ export interface Student {
   /** @nullable */
   classRoom?: string | null;
   status: StudentStatus;
-  /** @nullable */
-  notes?: string | null;
   parent1Name: string;
   parent1Email: string;
   /** @nullable */

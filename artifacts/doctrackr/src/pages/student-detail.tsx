@@ -43,7 +43,6 @@ export default function StudentDetailPage() {
       setLocalChecklist(student.checklistItems.map(item => ({
         ...item,
         expiryDate: item.expiryDate ? item.expiryDate.substring(0, 10) : "",
-        notes: item.notes || ""
       })));
       isDirty.current = false;
     }
@@ -63,7 +62,6 @@ export default function StudentDetailPage() {
       const itemsToUpdate = localChecklist.map(item => ({
         id: item.id,
         expiryDate: item.expiryDate ? new Date(item.expiryDate).toISOString() : null,
-        notes: item.notes || null
       }));
 
       await bulkUpdate.mutateAsync({ data: { items: itemsToUpdate } });
@@ -124,7 +122,6 @@ export default function StudentDetailPage() {
           {student.status}
         </Badge>
         {student.classRoom && <Badge variant="secondary">{student.classRoom}</Badge>}
-        {/* We would wire up the edit button here to open the dialog, but for now we link back or skip since edit is on the list page. For a full implementation we'd duplicate the edit form. */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -134,7 +131,6 @@ export default function StudentDetailPage() {
             <div className="flex justify-between"><span className="text-muted-foreground">DOB</span><span className="font-medium">{student.dateOfBirth ? format(parseISO(student.dateOfBirth), "MMM d, yyyy") : "—"}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Classroom</span><span className="font-medium">{student.classRoom || "—"}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Added</span><span className="font-medium">{format(parseISO(student.createdAt), "MMM d, yyyy")}</span></div>
-            {student.notes && <div className="mt-2 pt-2 border-t text-muted-foreground italic text-xs">{student.notes}</div>}
           </CardContent>
         </Card>
 
@@ -178,14 +174,13 @@ export default function StudentDetailPage() {
               <TableHead>Document</TableHead>
               <TableHead className="w-[180px]">Expiry Date</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="w-[200px]">Notes</TableHead>
               <TableHead>Reminders</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {localChecklist.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No documents required for this student.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No documents required for this student.</TableCell></TableRow>
             ) : (
               localChecklist.map((item) => (
                 <TableRow key={item.id} className="group hover:bg-muted/50 transition-colors">
@@ -205,14 +200,6 @@ export default function StudentDetailPage() {
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={item.status} />
-                  </TableCell>
-                  <TableCell>
-                    <Input 
-                      value={item.notes} 
-                      onChange={(e) => handleUpdateLocalItem(item.id, "notes", e.target.value)}
-                      placeholder="Optional notes..."
-                      className="h-8 text-sm"
-                    />
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground space-y-1">
                     <div>Last: {item.lastReminderSentAt ? format(parseISO(item.lastReminderSentAt), "MMM d, yy") : "Never"}</div>

@@ -43,7 +43,6 @@ export default function EmployeeDetailPage() {
       setLocalChecklist(employee.checklistItems.map(item => ({
         ...item,
         expiryDate: item.expiryDate ? item.expiryDate.substring(0, 10) : "",
-        notes: item.notes || ""
       })));
       isDirty.current = false;
     }
@@ -63,7 +62,6 @@ export default function EmployeeDetailPage() {
       const itemsToUpdate = localChecklist.map(item => ({
         id: item.id,
         expiryDate: item.expiryDate ? new Date(item.expiryDate).toISOString() : null,
-        notes: item.notes || null
       }));
 
       await bulkUpdate.mutateAsync({ data: { items: itemsToUpdate } });
@@ -131,7 +129,6 @@ export default function EmployeeDetailPage() {
             <div><span className="text-muted-foreground block mb-1">Role</span><span className="font-medium">{employee.role || "—"}</span></div>
             <div><span className="text-muted-foreground block mb-1">Added</span><span className="font-medium">{format(parseISO(employee.createdAt), "MMM d, yyyy")}</span></div>
           </div>
-          {employee.notes && <div className="mt-4 pt-4 border-t text-muted-foreground italic text-sm">{employee.notes}</div>}
         </CardContent>
       </Card>
 
@@ -150,14 +147,13 @@ export default function EmployeeDetailPage() {
               <TableHead>Document</TableHead>
               <TableHead className="w-[180px]">Expiry Date</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="w-[200px]">Notes</TableHead>
               <TableHead>Reminders</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {localChecklist.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No documents required for this employee.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No documents required for this employee.</TableCell></TableRow>
             ) : (
               localChecklist.map((item) => (
                 <TableRow key={item.id} className="group hover:bg-muted/50 transition-colors">
@@ -177,14 +173,6 @@ export default function EmployeeDetailPage() {
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={item.status} />
-                  </TableCell>
-                  <TableCell>
-                    <Input 
-                      value={item.notes} 
-                      onChange={(e) => handleUpdateLocalItem(item.id, "notes", e.target.value)}
-                      placeholder="Optional notes..."
-                      className="h-8 text-sm"
-                    />
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground space-y-1">
                     <div>Last: {item.lastReminderSentAt ? format(parseISO(item.lastReminderSentAt), "MMM d, yy") : "Never"}</div>

@@ -26,8 +26,6 @@ export interface ChecklistItem {
   expiryDate?: string | null;
   status: ChecklistItemStatus;
   /** @nullable */
-  notes?: string | null;
-  /** @nullable */
   lastReminderSentAt?: string | null;
   /** @nullable */
   nextReminderDueAt?: string | null;

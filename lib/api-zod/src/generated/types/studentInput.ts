@@ -14,8 +14,6 @@ export interface StudentInput {
   /** @nullable */
   classRoom?: string | null;
   status?: StudentInputStatus;
-  /** @nullable */
-  notes?: string | null;
   parent1Name: string;
   parent1Email: string;
   /** @nullable */

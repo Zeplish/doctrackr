@@ -17,8 +17,6 @@ export interface EmployeeDetail {
   /** @nullable */
   phone?: string | null;
   status: EmployeeDetailStatus;
-  /** @nullable */
-  notes?: string | null;
   createdAt: string;
   updatedAt: string;
   checklistItems: ChecklistItem[];

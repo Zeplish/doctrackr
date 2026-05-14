@@ -12,7 +12,7 @@ export interface DocumentTypeInput {
   category: DocumentTypeInputCategory;
   /** @nullable */
   description?: string | null;
-  isRequired: boolean;
+  isRequired?: boolean;
   isActive?: boolean;
   /** @nullable */
   templateFormUrl?: string | null;

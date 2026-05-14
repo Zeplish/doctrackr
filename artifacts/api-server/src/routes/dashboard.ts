@@ -39,7 +39,6 @@ async function buildAllChecklistItems() {
       expiryDate,
       status: computeDocumentStatus(expiryDate),
       daysUntilExpiry: computeDaysUntilExpiry(expiryDate),
-      notes: item.notes ?? null,
       lastReminderSentAt: item.lastReminderSentAt?.toISOString() ?? null,
       nextReminderDueAt: item.nextReminderDueAt?.toISOString() ?? null,
       createdAt: item.createdAt.toISOString(),

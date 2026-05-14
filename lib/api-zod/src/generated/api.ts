@@ -178,7 +178,6 @@ export const ListStudentsResponseItem = zod.object({
   dateOfBirth: zod.string().nullish(),
   classRoom: zod.string().nullish(),
   status: zod.enum(["active", "inactive"]),
-  notes: zod.string().nullish(),
   parent1Name: zod.string(),
   parent1Email: zod.string(),
   parent1Phone: zod.string().nullish(),
@@ -198,7 +197,6 @@ export const CreateStudentBody = zod.object({
   dateOfBirth: zod.string().nullish(),
   classRoom: zod.string().nullish(),
   status: zod.enum(["active", "inactive"]).optional(),
-  notes: zod.string().nullish(),
   parent1Name: zod.string(),
   parent1Email: zod.string(),
   parent1Phone: zod.string().nullish(),
@@ -220,7 +218,6 @@ export const GetStudentResponse = zod.object({
   dateOfBirth: zod.string().nullish(),
   classRoom: zod.string().nullish(),
   status: zod.enum(["active", "inactive"]),
-  notes: zod.string().nullish(),
   parent1Name: zod.string(),
   parent1Email: zod.string(),
   parent1Phone: zod.string().nullish(),
@@ -249,7 +246,6 @@ export const GetStudentResponse = zod.object({
         "due_today",
         "overdue",
       ]),
-      notes: zod.string().nullish(),
       lastReminderSentAt: zod.string().nullish(),
       nextReminderDueAt: zod.string().nullish(),
       daysUntilExpiry: zod.number().nullish(),
@@ -271,7 +267,6 @@ export const UpdateStudentBody = zod.object({
   dateOfBirth: zod.string().nullish(),
   classRoom: zod.string().nullish(),
   status: zod.enum(["active", "inactive"]).optional(),
-  notes: zod.string().nullish(),
   parent1Name: zod.string(),
   parent1Email: zod.string(),
   parent1Phone: zod.string().nullish(),
@@ -286,7 +281,6 @@ export const UpdateStudentResponse = zod.object({
   dateOfBirth: zod.string().nullish(),
   classRoom: zod.string().nullish(),
   status: zod.enum(["active", "inactive"]),
-  notes: zod.string().nullish(),
   parent1Name: zod.string(),
   parent1Email: zod.string(),
   parent1Phone: zod.string().nullish(),
@@ -324,7 +318,6 @@ export const ListEmployeesResponseItem = zod.object({
   email: zod.string(),
   phone: zod.string().nullish(),
   status: zod.enum(["active", "inactive"]),
-  notes: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
@@ -339,7 +332,6 @@ export const CreateEmployeeBody = zod.object({
   email: zod.string(),
   phone: zod.string().nullish(),
   status: zod.enum(["active", "inactive"]).optional(),
-  notes: zod.string().nullish(),
 });
 
 /**
@@ -356,7 +348,6 @@ export const GetEmployeeResponse = zod.object({
   email: zod.string(),
   phone: zod.string().nullish(),
   status: zod.enum(["active", "inactive"]),
-  notes: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
   checklistItems: zod.array(
@@ -379,7 +370,6 @@ export const GetEmployeeResponse = zod.object({
         "due_today",
         "overdue",
       ]),
-      notes: zod.string().nullish(),
       lastReminderSentAt: zod.string().nullish(),
       nextReminderDueAt: zod.string().nullish(),
       daysUntilExpiry: zod.number().nullish(),
@@ -402,7 +392,6 @@ export const UpdateEmployeeBody = zod.object({
   email: zod.string(),
   phone: zod.string().nullish(),
   status: zod.enum(["active", "inactive"]).optional(),
-  notes: zod.string().nullish(),
 });
 
 export const UpdateEmployeeResponse = zod.object({
@@ -412,7 +401,6 @@ export const UpdateEmployeeResponse = zod.object({
   email: zod.string(),
   phone: zod.string().nullish(),
   status: zod.enum(["active", "inactive"]),
-  notes: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
@@ -460,7 +448,7 @@ export const CreateDocumentTypeBody = zod.object({
   name: zod.string(),
   category: zod.enum(["student", "employee", "both"]),
   description: zod.string().nullish(),
-  isRequired: zod.boolean(),
+  isRequired: zod.boolean().optional(),
   isActive: zod.boolean().optional(),
   templateFormUrl: zod.string().nullish(),
 });
@@ -496,7 +484,7 @@ export const UpdateDocumentTypeBody = zod.object({
   name: zod.string(),
   category: zod.enum(["student", "employee", "both"]),
   description: zod.string().nullish(),
-  isRequired: zod.boolean(),
+  isRequired: zod.boolean().optional(),
   isActive: zod.boolean().optional(),
   templateFormUrl: zod.string().nullish(),
 });
@@ -578,7 +566,6 @@ export const ListChecklistItemsResponseItem = zod.object({
     "due_today",
     "overdue",
   ]),
-  notes: zod.string().nullish(),
   lastReminderSentAt: zod.string().nullish(),
   nextReminderDueAt: zod.string().nullish(),
   daysUntilExpiry: zod.number().nullish(),
@@ -615,7 +602,6 @@ export const GetChecklistItemResponse = zod.object({
     "due_today",
     "overdue",
   ]),
-  notes: zod.string().nullish(),
   lastReminderSentAt: zod.string().nullish(),
   nextReminderDueAt: zod.string().nullish(),
   daysUntilExpiry: zod.number().nullish(),
@@ -624,7 +610,7 @@ export const GetChecklistItemResponse = zod.object({
 });
 
 /**
- * @summary Update checklist item (expiry date, notes)
+ * @summary Update checklist item expiry date
  */
 export const UpdateChecklistItemParams = zod.object({
   id: zod.coerce.number(),
@@ -632,7 +618,6 @@ export const UpdateChecklistItemParams = zod.object({
 
 export const UpdateChecklistItemBody = zod.object({
   expiryDate: zod.string().nullish(),
-  notes: zod.string().nullish(),
 });
 
 export const UpdateChecklistItemResponse = zod.object({
@@ -654,7 +639,6 @@ export const UpdateChecklistItemResponse = zod.object({
     "due_today",
     "overdue",
   ]),
-  notes: zod.string().nullish(),
   lastReminderSentAt: zod.string().nullish(),
   nextReminderDueAt: zod.string().nullish(),
   daysUntilExpiry: zod.number().nullish(),
@@ -670,7 +654,6 @@ export const BulkUpdateChecklistItemsBody = zod.object({
     zod.object({
       id: zod.number(),
       expiryDate: zod.string().nullish(),
-      notes: zod.string().nullish(),
     }),
   ),
 });
@@ -694,7 +677,6 @@ export const BulkUpdateChecklistItemsResponseItem = zod.object({
     "due_today",
     "overdue",
   ]),
-  notes: zod.string().nullish(),
   lastReminderSentAt: zod.string().nullish(),
   nextReminderDueAt: zod.string().nullish(),
   daysUntilExpiry: zod.number().nullish(),
@@ -794,7 +776,6 @@ export const GetDashboardExpiringSoonResponseItem = zod.object({
     "due_today",
     "overdue",
   ]),
-  notes: zod.string().nullish(),
   lastReminderSentAt: zod.string().nullish(),
   nextReminderDueAt: zod.string().nullish(),
   daysUntilExpiry: zod.number().nullish(),
@@ -832,7 +813,6 @@ export const GetDashboardOverdueResponseItem = zod.object({
     "due_today",
     "overdue",
   ]),
-  notes: zod.string().nullish(),
   lastReminderSentAt: zod.string().nullish(),
   nextReminderDueAt: zod.string().nullish(),
   daysUntilExpiry: zod.number().nullish(),
@@ -870,7 +850,6 @@ export const GetDashboardMissingResponseItem = zod.object({
     "due_today",
     "overdue",
   ]),
-  notes: zod.string().nullish(),
   lastReminderSentAt: zod.string().nullish(),
   nextReminderDueAt: zod.string().nullish(),
   daysUntilExpiry: zod.number().nullish(),

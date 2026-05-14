@@ -10,6 +10,4 @@ export type BulkChecklistUpdateItemsItem = {
   id: number;
   /** @nullable */
   expiryDate?: string | null;
-  /** @nullable */
-  notes?: string | null;
 };

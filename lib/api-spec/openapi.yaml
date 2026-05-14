@@ -548,7 +548,7 @@ paths:
     patch:
       operationId: updateChecklistItem
       tags: [checklist]
-      summary: Update checklist item (expiry date, notes)
+      summary: Update checklist item expiry date
       parameters:
         - name: id
           in: path
@@ -944,8 +944,6 @@ components:
         status:
           type: string
           enum: [active, inactive]
-        notes:
-          type: ["string", "null"]
         parent1Name:
           type: string
         parent1Email:
@@ -983,8 +981,6 @@ components:
         status:
           type: string
           enum: [active, inactive]
-        notes:
-          type: ["string", "null"]
         parent1Name:
           type: string
         parent1Email:
@@ -1016,8 +1012,6 @@ components:
         status:
           type: string
           enum: [active, inactive]
-        notes:
-          type: ["string", "null"]
         parent1Name:
           type: string
         parent1Email:
@@ -1064,8 +1058,6 @@ components:
         status:
           type: string
           enum: [active, inactive]
-        notes:
-          type: ["string", "null"]
         createdAt:
           type: string
         updatedAt:
@@ -1092,8 +1084,6 @@ components:
         status:
           type: string
           enum: [active, inactive]
-        notes:
-          type: ["string", "null"]
       required:
         - fullName
         - email
@@ -1114,8 +1104,6 @@ components:
         status:
           type: string
           enum: [active, inactive]
-        notes:
-          type: ["string", "null"]
         createdAt:
           type: string
         updatedAt:
@@ -1186,7 +1174,6 @@ components:
       required:
         - name
         - category
-        - isRequired
 
     ChecklistItem:
       type: object
@@ -1218,8 +1205,6 @@ components:
         status:
           type: string
           enum: [missing, valid, expiring_soon, due_today, overdue]
-        notes:
-          type: ["string", "null"]
         lastReminderSentAt:
           type: ["string", "null"]
         nextReminderDueAt:
@@ -1248,8 +1233,6 @@ components:
       properties:
         expiryDate:
           type: ["string", "null"]
-        notes:
-          type: ["string", "null"]
 
     BulkChecklistUpdate:
       type: object
@@ -1262,8 +1245,6 @@ components:
               id:
                 type: integer
               expiryDate:
-                type: ["string", "null"]
-              notes:
                 type: ["string", "null"]
             required:
               - id
