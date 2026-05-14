@@ -8,7 +8,6 @@ import {
   useListDocumentTypes,
   useCreateDocumentType,
   useUpdateDocumentType,
-  useDeleteDocumentType,
   useToggleDocumentTypeActive,
   getListDocumentTypesQueryKey,
   ListDocumentTypesCategory
@@ -20,7 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Edit, ExternalLink } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,16 +27,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
@@ -55,19 +44,17 @@ export default function DocumentTypesPage() {
   const qc = useQueryClient();
   const [categoryTab, setCategoryTab] = useState<ListDocumentTypesCategory>("all");
   const [showInactive, setShowInactive] = useState(false);
-  
+
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const { data: docTypes, isLoading } = useListDocumentTypes({ 
-    category: categoryTab, 
-    status: showInactive ? "all" : "active" 
+  const { data: docTypes, isLoading } = useListDocumentTypes({
+    category: categoryTab,
+    status: showInactive ? "all" : "active"
   });
-  
+
   const createDocType = useCreateDocumentType();
   const updateDocType = useUpdateDocumentType();
-  const deleteDocType = useDeleteDocumentType();
   const toggleActive = useToggleDocumentTypeActive();
 
   const form = useForm<DocTypeFormValues>({
@@ -109,26 +96,13 @@ export default function DocumentTypesPage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!deleteId) return;
-    try {
-      await deleteDocType.mutateAsync({ id: deleteId! });
-      qc.invalidateQueries({ queryKey: getListDocumentTypesQueryKey() });
-      toast.success("Document type deleted successfully");
-    } catch (e) {
-      toast.error("Failed to delete document type. It may be in use.");
-    } finally {
-      setDeleteId(null);
-    }
-  };
-
   const handleToggleActive = async (id: number) => {
     try {
       await toggleActive.mutateAsync({ id });
       qc.invalidateQueries({ queryKey: getListDocumentTypesQueryKey() });
-      toast.success("Status updated successfully");
+      toast.success("Status updated");
     } catch (e) {
-      toast.error("Failed to toggle status");
+      toast.error("Failed to update status");
     }
   };
 
@@ -269,22 +243,6 @@ export default function DocumentTypesPage() {
               </Form>
             </DialogContent>
           </Dialog>
-
-          {/* Delete Dialog */}
-          <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Document Type?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete this document type. If it is already in use by students or employees, consider deactivating it instead so historical records are preserved.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
       </div>
 
@@ -307,7 +265,7 @@ export default function DocumentTypesPage() {
                   <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                 </TableRow>
               ))
             ) : docTypes?.length === 0 ? (
@@ -358,9 +316,27 @@ export default function DocumentTypesPage() {
                       <Button variant="ghost" size="icon" onClick={() => openEdit(type)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => setDeleteId(type.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {type.isActive ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => handleToggleActive(type.id)}
+                          disabled={toggleActive.isPending}
+                        >
+                          Deactivate
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-green-700 border-green-300 hover:bg-green-50 hover:text-green-800"
+                          onClick={() => handleToggleActive(type.id)}
+                          disabled={toggleActive.isPending}
+                        >
+                          Activate
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

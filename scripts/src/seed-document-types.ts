@@ -26,14 +26,10 @@ const studentDocTypes = [
 ];
 
 const employeeDocTypeNames = [
-  "Resume",
-  "3 Reference Letters",
   "State Central Registry (SCR) Clearance",
   "DOH Fingerprint Clearance",
   "DOE Fingerprint Clearance",
   "DOH Clearance Letter",
-  "DOH Approval Request",
-  "Diploma",
   "Medical Form",
   "Child Abuse Identification & Reporting",
   "Infection Control",
@@ -53,10 +49,8 @@ const employeeDocTypeNames = [
   "Legally Exempt Child Care Training",
   "Supporting Language Development: Birth to 5",
   "ACEs & Trauma-Informed Practice",
-  "Supporting Children with Special Needs",
   "CPR & First Aid Certification",
   "Sexual Harassment Training",
-  "W-2 Form",
 ];
 
 const employeeDocTypes = employeeDocTypeNames.map((name) => ({
