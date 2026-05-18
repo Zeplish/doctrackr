@@ -132,6 +132,82 @@ export const TestSmtpSettingsResponse = zod.object({
 });
 
 /**
+ * @summary Get SMS/Twilio settings
+ */
+export const GetSmsSettingsResponse = zod.object({
+  id: zod.number(),
+  accountSid: zod.string().nullish(),
+  fromNumber: zod.string().nullish(),
+  enabled: zod.boolean(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+
+/**
+ * @summary Update SMS/Twilio settings
+ */
+export const UpdateSmsSettingsBody = zod.object({
+  accountSid: zod.string().nullish(),
+  authToken: zod.string().nullish(),
+  fromNumber: zod.string().nullish(),
+  enabled: zod.boolean().optional(),
+});
+
+export const UpdateSmsSettingsResponse = zod.object({
+  id: zod.number(),
+  accountSid: zod.string().nullish(),
+  fromNumber: zod.string().nullish(),
+  enabled: zod.boolean(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+
+/**
+ * @summary Send a test SMS
+ */
+export const TestSmsSettingsBody = zod.object({
+  toPhone: zod.string(),
+});
+
+export const TestSmsSettingsResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string(),
+});
+
+/**
+ * @summary List SMS logs
+ */
+export const ListSmsLogsQueryParams = zod.object({
+  personType: zod.enum(["student", "employee", "all"]).optional(),
+  status: zod.enum(["sent", "failed", "all"]).optional(),
+  page: zod.coerce.number().optional(),
+  limit: zod.coerce.number().optional(),
+});
+
+export const ListSmsLogsResponse = zod.object({
+  items: zod.array(
+    zod.object({
+      id: zod.number(),
+      recipientPhone: zod.string(),
+      personType: zod.enum(["student", "employee"]),
+      personId: zod.number(),
+      personName: zod.string(),
+      checklistItemId: zod.number(),
+      documentTypeId: zod.number(),
+      documentTypeName: zod.string(),
+      messageBody: zod.string(),
+      smsStatus: zod.enum(["sent", "failed"]),
+      errorMessage: zod.string().nullish(),
+      reminderType: zod.enum(["automatic", "manual", "overdue"]),
+      sentAt: zod.string(),
+    }),
+  ),
+  total: zod.number(),
+  page: zod.number(),
+  limit: zod.number(),
+});
+
+/**
  * @summary Get reminder schedule settings
  */
 export const GetReminderSettingsResponse = zod.object({

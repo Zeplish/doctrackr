@@ -36,17 +36,22 @@ import type {
   ListDocumentTypesParams,
   ListEmailLogsParams,
   ListEmployeesParams,
+  ListSmsLogsParams,
   ListStudentsParams,
   Organization,
   OrganizationInput,
   ReminderSettings,
   ReminderSettingsInput,
+  SmsLogPage,
+  SmsSettings,
+  SmsSettingsInput,
   SmtpSettings,
   SmtpSettingsInput,
   Student,
   StudentDetail,
   StudentInput,
   TestEmailInput,
+  TestSmsInput,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -540,6 +545,347 @@ export const useTestSmtpSettings = <
 > => {
   return useMutation(getTestSmtpSettingsMutationOptions(options));
 };
+
+/**
+ * @summary Get SMS/Twilio settings
+ */
+export const getGetSmsSettingsUrl = () => {
+  return `/api/sms-settings`;
+};
+
+export const getSmsSettings = async (
+  options?: RequestInit,
+): Promise<SmsSettings> => {
+  return customFetch<SmsSettings>(getGetSmsSettingsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetSmsSettingsQueryKey = () => {
+  return [`/api/sms-settings`] as const;
+};
+
+export const getGetSmsSettingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSmsSettings>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getSmsSettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetSmsSettingsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSmsSettings>>> = ({
+    signal,
+  }) => getSmsSettings({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSmsSettings>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetSmsSettingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSmsSettings>>
+>;
+export type GetSmsSettingsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get SMS/Twilio settings
+ */
+
+export function useGetSmsSettings<
+  TData = Awaited<ReturnType<typeof getSmsSettings>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getSmsSettings>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetSmsSettingsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update SMS/Twilio settings
+ */
+export const getUpdateSmsSettingsUrl = () => {
+  return `/api/sms-settings`;
+};
+
+export const updateSmsSettings = async (
+  smsSettingsInput: SmsSettingsInput,
+  options?: RequestInit,
+): Promise<SmsSettings> => {
+  return customFetch<SmsSettings>(getUpdateSmsSettingsUrl(), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(smsSettingsInput),
+  });
+};
+
+export const getUpdateSmsSettingsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSmsSettings>>,
+    TError,
+    { data: BodyType<SmsSettingsInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateSmsSettings>>,
+  TError,
+  { data: BodyType<SmsSettingsInput> },
+  TContext
+> => {
+  const mutationKey = ["updateSmsSettings"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateSmsSettings>>,
+    { data: BodyType<SmsSettingsInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateSmsSettings(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateSmsSettingsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateSmsSettings>>
+>;
+export type UpdateSmsSettingsMutationBody = BodyType<SmsSettingsInput>;
+export type UpdateSmsSettingsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update SMS/Twilio settings
+ */
+export const useUpdateSmsSettings = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSmsSettings>>,
+    TError,
+    { data: BodyType<SmsSettingsInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateSmsSettings>>,
+  TError,
+  { data: BodyType<SmsSettingsInput> },
+  TContext
+> => {
+  return useMutation(getUpdateSmsSettingsMutationOptions(options));
+};
+
+/**
+ * @summary Send a test SMS
+ */
+export const getTestSmsSettingsUrl = () => {
+  return `/api/sms-settings/test`;
+};
+
+export const testSmsSettings = async (
+  testSmsInput: TestSmsInput,
+  options?: RequestInit,
+): Promise<ActionResult> => {
+  return customFetch<ActionResult>(getTestSmsSettingsUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(testSmsInput),
+  });
+};
+
+export const getTestSmsSettingsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof testSmsSettings>>,
+    TError,
+    { data: BodyType<TestSmsInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof testSmsSettings>>,
+  TError,
+  { data: BodyType<TestSmsInput> },
+  TContext
+> => {
+  const mutationKey = ["testSmsSettings"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof testSmsSettings>>,
+    { data: BodyType<TestSmsInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return testSmsSettings(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TestSmsSettingsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof testSmsSettings>>
+>;
+export type TestSmsSettingsMutationBody = BodyType<TestSmsInput>;
+export type TestSmsSettingsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Send a test SMS
+ */
+export const useTestSmsSettings = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof testSmsSettings>>,
+    TError,
+    { data: BodyType<TestSmsInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof testSmsSettings>>,
+  TError,
+  { data: BodyType<TestSmsInput> },
+  TContext
+> => {
+  return useMutation(getTestSmsSettingsMutationOptions(options));
+};
+
+/**
+ * @summary List SMS logs
+ */
+export const getListSmsLogsUrl = (params?: ListSmsLogsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/sms-logs?${stringifiedParams}`
+    : `/api/sms-logs`;
+};
+
+export const listSmsLogs = async (
+  params?: ListSmsLogsParams,
+  options?: RequestInit,
+): Promise<SmsLogPage> => {
+  return customFetch<SmsLogPage>(getListSmsLogsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListSmsLogsQueryKey = (params?: ListSmsLogsParams) => {
+  return [`/api/sms-logs`, ...(params ? [params] : [])] as const;
+};
+
+export const getListSmsLogsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listSmsLogs>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListSmsLogsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listSmsLogs>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListSmsLogsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listSmsLogs>>> = ({
+    signal,
+  }) => listSmsLogs(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listSmsLogs>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListSmsLogsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listSmsLogs>>
+>;
+export type ListSmsLogsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List SMS logs
+ */
+
+export function useListSmsLogs<
+  TData = Awaited<ReturnType<typeof listSmsLogs>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListSmsLogsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listSmsLogs>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListSmsLogsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Get reminder schedule settings

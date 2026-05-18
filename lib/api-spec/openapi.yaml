@@ -126,6 +126,89 @@ paths:
               schema:
                 $ref: "#/components/schemas/ActionResult"
 
+  # SMS Settings
+  /sms-settings:
+    get:
+      operationId: getSmsSettings
+      tags: [sms]
+      summary: Get SMS/Twilio settings
+      responses:
+        "200":
+          description: SMS settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmsSettings"
+    put:
+      operationId: updateSmsSettings
+      tags: [sms]
+      summary: Update SMS/Twilio settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmsSettingsInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmsSettings"
+
+  /sms-settings/test:
+    post:
+      operationId: testSmsSettings
+      tags: [sms]
+      summary: Send a test SMS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestSmsInput"
+      responses:
+        "200":
+          description: Test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResult"
+
+  # SMS Logs
+  /sms-logs:
+    get:
+      operationId: listSmsLogs
+      tags: [sms]
+      summary: List SMS logs
+      parameters:
+        - name: personType
+          in: query
+          schema:
+            type: string
+            enum: [student, employee, all]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [sent, failed, all]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: SMS logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmsLogPage"
+
   # Reminder Settings
   /reminder-settings:
     get:
@@ -838,6 +921,112 @@ components:
           type: ["string", "null"]
       required:
         - name
+
+    SmsSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        accountSid:
+          type: ["string", "null"]
+        fromNumber:
+          type: ["string", "null"]
+        enabled:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - enabled
+        - createdAt
+        - updatedAt
+
+    SmsSettingsInput:
+      type: object
+      properties:
+        accountSid:
+          type: ["string", "null"]
+        authToken:
+          type: ["string", "null"]
+        fromNumber:
+          type: ["string", "null"]
+        enabled:
+          type: boolean
+
+    TestSmsInput:
+      type: object
+      properties:
+        toPhone:
+          type: string
+      required:
+        - toPhone
+
+    SmsLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        recipientPhone:
+          type: string
+        personType:
+          type: string
+          enum: [student, employee]
+        personId:
+          type: integer
+        personName:
+          type: string
+        checklistItemId:
+          type: integer
+        documentTypeId:
+          type: integer
+        documentTypeName:
+          type: string
+        messageBody:
+          type: string
+        smsStatus:
+          type: string
+          enum: [sent, failed]
+        errorMessage:
+          type: ["string", "null"]
+        reminderType:
+          type: string
+          enum: [automatic, manual, overdue]
+        sentAt:
+          type: string
+      required:
+        - id
+        - recipientPhone
+        - personType
+        - personId
+        - personName
+        - checklistItemId
+        - documentTypeId
+        - documentTypeName
+        - messageBody
+        - smsStatus
+        - reminderType
+        - sentAt
+
+    SmsLogPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SmsLog"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - limit
 
     SmtpSettings:
       type: object

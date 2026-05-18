@@ -20,7 +20,8 @@
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.7",
     "pino": "^9",
-    "pino-http": "^10"
+    "pino-http": "^10",
+    "twilio": "^6.0.2"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
