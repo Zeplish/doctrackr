@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Eye, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Eye, Edit, Trash2, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -56,16 +56,32 @@ const studentSchema = z.object({
 
 type StudentFormValues = z.infer<typeof studentSchema>;
 
+type SortDir = "asc" | "desc";
+
 export default function StudentsPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ListStudentsStatus>("all");
+  const [sortDir, setSortDir] = useState<SortDir | null>(null);
   
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const { data: students, isLoading } = useListStudents({ search, status: statusFilter });
+
+  const sortedStudents = sortDir == null ? students : [...(students ?? [])].sort((a, b) => {
+    const aVal = a.classRoom ?? "";
+    const bVal = b.classRoom ?? "";
+    if (!aVal && !bVal) return 0;
+    if (!aVal) return 1;
+    if (!bVal) return -1;
+    return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+  });
+
+  const handleClassRoomSort = () => {
+    setSortDir((prev) => prev === null ? "asc" : prev === "asc" ? "desc" : null);
+  };
   const createStudent = useCreateStudent();
   const updateStudent = useUpdateStudent();
   const deleteStudent = useDeleteStudent();
@@ -321,7 +337,21 @@ export default function StudentsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Full Name</TableHead>
-              <TableHead>Class/Room</TableHead>
+              <TableHead>
+                <button
+                  onClick={handleClassRoomSort}
+                  className="flex items-center gap-1 hover:text-foreground transition-colors"
+                >
+                  Class/Room
+                  {sortDir === "asc" ? (
+                    <ChevronUp className="h-3.5 w-3.5" />
+                  ) : sortDir === "desc" ? (
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  ) : (
+                    <ChevronsUpDown className="h-3.5 w-3.5 opacity-40" />
+                  )}
+                </button>
+              </TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Primary Parent Email</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -338,14 +368,14 @@ export default function StudentsPage() {
                   <TableCell><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                 </TableRow>
               ))
-            ) : students?.length === 0 ? (
+            ) : sortedStudents?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   No students found
                 </TableCell>
               </TableRow>
             ) : (
-              students?.map((student) => (
+              sortedStudents?.map((student) => (
                 <TableRow key={student.id}>
                   <TableCell>
                     <Link href={`/students/${student.id}`} className="font-medium hover:underline text-primary">
