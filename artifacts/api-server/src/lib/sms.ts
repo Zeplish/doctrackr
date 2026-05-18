@@ -16,12 +16,12 @@ export async function ensureSmsSettings() {
   return existing;
 }
 
-export async function sendSms(to: string, body: string): Promise<void> {
+export async function sendSms(to: string, body: string, opts?: { skipEnabledCheck?: boolean }): Promise<void> {
   const settings = await getSmsSettings();
   if (!settings?.accountSid || !settings?.authToken || !settings?.fromNumber) {
     throw new Error("SMS not configured: missing Account SID, Auth Token, or From Number");
   }
-  if (!settings.enabled) {
+  if (!opts?.skipEnabledCheck && !settings.enabled) {
     throw new Error("SMS is disabled in settings");
   }
 

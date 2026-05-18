@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { smsSettingsTable, smsLogsTable } from "@workspace/db";
 import { UpdateSmsSettingsBody, TestSmsSettingsBody, ListSmsLogsQueryParams } from "@workspace/api-zod";
-import { eq, desc, count } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
 import { ensureSmsSettings, sendSms } from "../lib/sms";
 
 const router = Router();
@@ -41,7 +41,7 @@ router.post("/sms-settings/test", async (req, res): Promise<void> => {
   try {
     const parsed = TestSmsSettingsBody.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid input" }); return; }
-    await sendSms(parsed.data!.toPhone, "DocTrackr: This is a test message. Your SMS settings are working correctly.");
+    await sendSms(parsed.data!.toPhone, "DocTrackr: This is a test message. Your SMS settings are working correctly.", { skipEnabledCheck: true });
     res.json({ success: true, message: "Test SMS sent successfully" });
   } catch (err: unknown) {
     req.log.error(err);
@@ -57,18 +57,24 @@ router.get("/sms-logs", async (req, res): Promise<void> => {
     const limit = params.limit ?? 25;
     const offset = (page - 1) * limit;
 
-    const allLogs = await db.select().from(smsLogsTable).orderBy(desc(smsLogsTable.sentAt));
+    let query = db.select().from(smsLogsTable).$dynamic();
+    let countQuery = db.select({ count: count() }).from(smsLogsTable).$dynamic();
+    const conditions = [];
 
-    let filtered = allLogs;
     if (params.personType && params.personType !== "all") {
-      filtered = filtered.filter((l) => l.personType === params.personType);
+      conditions.push(eq(smsLogsTable.personType, params.personType));
     }
     if (params.status && params.status !== "all") {
-      filtered = filtered.filter((l) => l.smsStatus === params.status);
+      conditions.push(eq(smsLogsTable.smsStatus, params.status));
     }
 
-    const total = filtered.length;
-    const items = filtered.slice(offset, offset + limit);
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+      countQuery = countQuery.where(and(...conditions));
+    }
+
+    const [{ count: total }] = await countQuery;
+    const items = await query.orderBy(desc(smsLogsTable.sentAt)).limit(limit).offset(offset);
 
     res.json({ items, total, page, limit });
   } catch (err) {

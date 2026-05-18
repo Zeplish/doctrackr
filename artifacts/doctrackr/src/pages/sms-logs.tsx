@@ -31,7 +31,7 @@ export default function SmsLogsPage() {
     <Layout title="SMS Logs">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-2">
-          <Select value={personType} onValueChange={(v: any) => { setPersonType(v); setPage(1); }}>
+          <Select value={personType} onValueChange={(v) => { setPersonType(v as PersonTypeFilter); setPage(1); }}>
             <SelectTrigger className="w-[140px] bg-card">
               <SelectValue placeholder="Person Type" />
             </SelectTrigger>
@@ -42,7 +42,7 @@ export default function SmsLogsPage() {
             </SelectContent>
           </Select>
 
-          <Select value={status} onValueChange={(v: any) => { setStatus(v); setPage(1); }}>
+          <Select value={status} onValueChange={(v) => { setStatus(v as StatusFilter); setPage(1); }}>
             <SelectTrigger className="w-[130px] bg-card">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
