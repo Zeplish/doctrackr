@@ -139,6 +139,7 @@ export const GetSmsSettingsResponse = zod.object({
   accountSid: zod.string().nullish(),
   fromNumber: zod.string().nullish(),
   enabled: zod.boolean(),
+  authTokenSet: zod.boolean(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
@@ -158,6 +159,7 @@ export const UpdateSmsSettingsResponse = zod.object({
   accountSid: zod.string().nullish(),
   fromNumber: zod.string().nullish(),
   enabled: zod.boolean(),
+  authTokenSet: zod.boolean(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });

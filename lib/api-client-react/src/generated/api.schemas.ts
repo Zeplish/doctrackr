@@ -86,6 +86,7 @@ export interface SmsSettings {
   /** @nullable */
   fromNumber?: string | null;
   enabled: boolean;
+  authTokenSet: boolean;
   createdAt: string;
   updatedAt: string;
 }

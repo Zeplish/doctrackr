@@ -22,26 +22,46 @@ router.put("/sms-settings", async (req, res): Promise<void> => {
   try {
     const parsed = UpdateSmsSettingsBody.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid input" }); return; }
+
     const settings = await ensureSmsSettings();
-    const updateData: Record<string, unknown> = { ...parsed.data, updatedAt: new Date() };
-    if (!parsed.data!.authToken) delete updateData.authToken;
+    const data = parsed.data!;
+
+    if (data.enabled) {
+      const hasAccountSid = data.accountSid || settings.accountSid;
+      const hasFromNumber = data.fromNumber || settings.fromNumber;
+      const hasAuthToken = data.authToken || settings.authToken;
+      if (!hasAccountSid || !hasFromNumber || !hasAuthToken) {
+        res.status(400).json({ error: "Account SID, Auth Token, and From Number are required before enabling SMS." });
+        return;
+      }
+    }
+
+    const updateData: Record<string, unknown> = { ...data, updatedAt: new Date() };
+    if (!data.authToken) delete updateData.authToken;
     const [updated] = await db.update(smsSettingsTable)
       .set(updateData)
       .where(eq(smsSettingsTable.id, settings.id))
       .returning();
-    const { authToken: _t, ...safe } = updated;
-    res.json(safe);
+    const { authToken, ...safe } = updated;
+    res.json({ ...safe, authTokenSet: Boolean(authToken) });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
+const E164_REGEX = /^\+[1-9]\d{6,14}$/;
+
 router.post("/sms-settings/test", async (req, res): Promise<void> => {
   try {
     const parsed = TestSmsSettingsBody.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: "Invalid input" }); return; }
-    await sendSms(parsed.data!.toPhone, "DocTrackr: This is a test message. Your SMS settings are working correctly.", { skipEnabledCheck: true });
+    const { toPhone } = parsed.data!;
+    if (!E164_REGEX.test(toPhone)) {
+      res.json({ success: false, message: "Invalid phone number. Use E.164 format (e.g. +12125551234)." });
+      return;
+    }
+    await sendSms(toPhone, "DocTrackr: This is a test message. Your SMS settings are working correctly.", { skipEnabledCheck: true });
     res.json({ success: true, message: "Test SMS sent successfully" });
   } catch (err: unknown) {
     req.log.error(err);

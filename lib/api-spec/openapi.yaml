@@ -933,6 +933,8 @@ components:
           type: ["string", "null"]
         enabled:
           type: boolean
+        authTokenSet:
+          type: boolean
         createdAt:
           type: string
         updatedAt:
@@ -940,6 +942,7 @@ components:
       required:
         - id
         - enabled
+        - authTokenSet
         - createdAt
         - updatedAt
 
