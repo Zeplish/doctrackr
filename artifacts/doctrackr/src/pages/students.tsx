@@ -48,10 +48,10 @@ const studentSchema = z.object({
   status: z.enum(["active", "inactive"]),
   parent1Name: z.string().min(1, "Parent 1 name is required"),
   parent1Email: z.string().email("Invalid email address").min(1, "Parent 1 email is required"),
-  parent1Phone: z.string().nullable().optional(),
+  parent1Phone: z.string().regex(/^\+?[\d\s\-()]*$/, "Invalid phone number format").nullable().optional(),
   parent2Name: z.string().nullable().optional(),
   parent2Email: z.string().email("Invalid email address").nullable().optional().or(z.literal('')),
-  parent2Phone: z.string().nullable().optional(),
+  parent2Phone: z.string().regex(/^\+?[\d\s\-()]*$/, "Invalid phone number format").nullable().optional(),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
