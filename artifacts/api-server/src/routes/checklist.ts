@@ -237,9 +237,9 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
             status,
           });
           try {
-            await sendSms(s.parent1Phone as string, smsBody);
+            await sendSms(s.parent1Phone, smsBody);
             await db.insert(smsLogsTable).values({
-              recipientPhone: s.parent1Phone as string,
+              recipientPhone: s.parent1Phone,
               personType: "student",
               personId: s.id,
               personName: s.fullName,
@@ -253,7 +253,7 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
           } catch (smsErr) {
             req.log.error({ smsErr }, "Failed to send SMS for manual reminder");
             await db.insert(smsLogsTable).values({
-              recipientPhone: s.parent1Phone as string,
+              recipientPhone: s.parent1Phone,
               personType: "student",
               personId: s.id,
               personName: s.fullName,
@@ -305,9 +305,9 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
             status,
           });
           try {
-            await sendSms(e.phone as string, smsBody);
+            await sendSms(e.phone, smsBody);
             await db.insert(smsLogsTable).values({
-              recipientPhone: e.phone as string,
+              recipientPhone: e.phone,
               personType: "employee",
               personId: e.id,
               personName: e.fullName,
@@ -321,7 +321,7 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
           } catch (smsErr) {
             req.log.error({ smsErr }, "Failed to send SMS for manual reminder");
             await db.insert(smsLogsTable).values({
-              recipientPhone: e.phone as string,
+              recipientPhone: e.phone,
               personType: "employee",
               personId: e.id,
               personName: e.fullName,

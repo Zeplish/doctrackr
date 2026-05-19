@@ -26,7 +26,8 @@ router.put("/sms-settings", async (req, res): Promise<void> => {
     const settings = await ensureSmsSettings();
     const data = parsed.data!;
 
-    if (data.enabled) {
+    const effectiveEnabled = data.enabled !== undefined ? data.enabled : settings.enabled;
+    if (effectiveEnabled) {
       const hasAccountSid = data.accountSid || settings.accountSid;
       const hasFromNumber = data.fromNumber || settings.fromNumber;
       const hasAuthToken = data.authToken || settings.authToken;
