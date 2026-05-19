@@ -1,14 +1,16 @@
 FROM node:24-alpine AS base
 WORKDIR /app
-RUN npm install -g pnpm@10.26.1
+ENV npm_config_user_agent=pnpm/docker
+RUN npm install -g pnpm
 
 FROM base AS deps
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY .npmrc ./
 COPY lib/db/package.json ./lib/db/
 COPY lib/api-spec/package.json ./lib/api-spec/
 COPY lib/api-client-react/package.json ./lib/api-client-react/
 COPY artifacts/doctrackr/package.json ./artifacts/doctrackr/
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --dangerously-allow-all-builds
 
 FROM deps AS build
 COPY lib/ ./lib/
@@ -22,6 +24,6 @@ RUN pnpm --filter @workspace/doctrackr run build
 
 FROM nginx:alpine AS runner
 COPY artifacts/doctrackr/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/artifacts/doctrackr/dist /usr/share/nginx/html
+COPY --from=build /app/artifacts/doctrackr/dist/public /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
