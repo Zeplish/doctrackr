@@ -12,6 +12,8 @@ export async function getTransporter() {
   const port = smtp.port ?? 587;
   return nodemailer.createTransport({
     host: smtp.host,
+    // port: smtp.port ?? 587,
+    // secure: true,
     port,
     secure: port === 465,
     auth: smtp.username && smtp.password
