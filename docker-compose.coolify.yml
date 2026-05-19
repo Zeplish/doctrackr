@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-doctrackr}
+      POSTGRES_USER: ${POSTGRES_USER:-doctrackr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-doctrackr} -d ${POSTGRES_DB:-doctrackr}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: artifacts/api-server/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-doctrackr}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-doctrackr}
+      SESSION_SECRET: ${SESSION_SECRET}
+      AUTH_USERNAME: ${AUTH_USERNAME:-admin}
+      AUTH_PASSWORD: ${AUTH_PASSWORD}
+      NODE_ENV: production
+      PORT: 8080
+    expose:
+      - "8080"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: artifacts/doctrackr/Dockerfile
+      args:
+        BASE_PATH: /
+        PORT: 80
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  proxy:
+    build:
+      context: .
+      dockerfile: artifacts/proxy/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+      - frontend
+    expose:
+      - "80"
+
+volumes:
+  db_data:
