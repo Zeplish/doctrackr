@@ -25,6 +25,7 @@ import {
   LogOut,
   KeyRound,
   MailOpen,
+  MessageSquare,
 } from "lucide-react";
 import { ReactNode } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -100,6 +101,14 @@ export function Layout({ children, title }: { children: ReactNode; title: string
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location.startsWith("/sms-logs")}>
+                  <Link href="/sms-logs" className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    <span>SMS Logs</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
 
               <Collapsible defaultOpen={isSettingsActive} className="group/collapsible">
                 <SidebarMenuItem>
@@ -142,6 +151,12 @@ export function Layout({ children, title }: { children: ReactNode; title: string
                         <Link href="/settings/email-templates" className="flex items-center gap-2">
                           <MailOpen className="h-4 w-4" />
                           <span>Email Templates</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      <SidebarMenuButton asChild isActive={location === "/settings/sms"} size="sm">
+                        <Link href="/settings/sms" className="flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4" />
+                          <span>SMS</span>
                         </Link>
                       </SidebarMenuButton>
                     </div>

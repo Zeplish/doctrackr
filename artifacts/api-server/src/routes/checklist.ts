@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import {
-  checklistItemsTable, documentTypesTable, studentsTable, employeesTable, emailLogsTable, organizationTable, smtpSettingsTable, reminderSettingsTable,
+  checklistItemsTable, documentTypesTable, studentsTable, employeesTable, emailLogsTable, smsLogsTable, organizationTable, smtpSettingsTable, reminderSettingsTable,
 } from "@workspace/db";
 import {
   UpdateChecklistItemBody, BulkUpdateChecklistItemsBody, ListChecklistItemsQueryParams,
@@ -9,6 +9,7 @@ import {
 import { eq, and, or, ilike, isNull, isNotNull, lte, gte, sql } from "drizzle-orm";
 import { computeDocumentStatus, computeDaysUntilExpiry } from "../lib/checklist-status";
 import { getTransporter, buildStudentReminderEmail, buildEmployeeReminderEmail, sendReminderEmail } from "../lib/email";
+import { getSmsSettings, sendSms, buildStudentSmsBody, buildEmployeeSmsBody } from "../lib/sms";
 import { format, parseISO } from "date-fns";
 
 const router = Router();
@@ -175,6 +176,7 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
 
     const [org] = await db.select().from(organizationTable).limit(1);
     const [smtp] = await db.select().from(smtpSettingsTable).limit(1);
+    const smsSettings = await getSmsSettings();
 
     if (!smtp?.host) {
       res.json({ success: false, message: "SMTP not configured. Please configure email settings first." }); return;
@@ -226,6 +228,45 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
           emailStatus: "sent",
           reminderType: "manual",
         });
+        if (smsSettings?.enabled && s.parent1Phone) {
+          const smsBody = buildStudentSmsBody({
+            orgName: org?.name ?? "DocTrackr",
+            studentName: s.fullName,
+            documentType: docType.name,
+            expiryDate,
+            status,
+          });
+          try {
+            await sendSms(s.parent1Phone, smsBody);
+            await db.insert(smsLogsTable).values({
+              recipientPhone: s.parent1Phone,
+              personType: "student",
+              personId: s.id,
+              personName: s.fullName,
+              checklistItemId: id,
+              documentTypeId: docType.id,
+              documentTypeName: docType.name,
+              messageBody: smsBody,
+              smsStatus: "sent",
+              reminderType: "manual",
+            });
+          } catch (smsErr) {
+            req.log.error({ smsErr }, "Failed to send SMS for manual reminder");
+            await db.insert(smsLogsTable).values({
+              recipientPhone: s.parent1Phone,
+              personType: "student",
+              personId: s.id,
+              personName: s.fullName,
+              checklistItemId: id,
+              documentTypeId: docType.id,
+              documentTypeName: docType.name,
+              messageBody: smsBody,
+              smsStatus: "failed",
+              errorMessage: smsErr instanceof Error ? smsErr.message : "Unknown error",
+              reminderType: "manual",
+            });
+          }
+        }
       } else if (item.personType === "employee" && row.employee) {
         const e = row.employee!;
         const { subject, html } = buildEmployeeReminderEmail({
@@ -255,6 +296,45 @@ router.post("/checklist/:id/send-reminder", async (req, res): Promise<void> => {
           emailStatus: "sent",
           reminderType: "manual",
         });
+        if (smsSettings?.enabled && e.phone) {
+          const smsBody = buildEmployeeSmsBody({
+            orgName: org?.name ?? "DocTrackr",
+            employeeName: e.fullName,
+            documentType: docType.name,
+            expiryDate,
+            status,
+          });
+          try {
+            await sendSms(e.phone, smsBody);
+            await db.insert(smsLogsTable).values({
+              recipientPhone: e.phone,
+              personType: "employee",
+              personId: e.id,
+              personName: e.fullName,
+              checklistItemId: id,
+              documentTypeId: docType.id,
+              documentTypeName: docType.name,
+              messageBody: smsBody,
+              smsStatus: "sent",
+              reminderType: "manual",
+            });
+          } catch (smsErr) {
+            req.log.error({ smsErr }, "Failed to send SMS for manual reminder");
+            await db.insert(smsLogsTable).values({
+              recipientPhone: e.phone,
+              personType: "employee",
+              personId: e.id,
+              personName: e.fullName,
+              checklistItemId: id,
+              documentTypeId: docType.id,
+              documentTypeName: docType.name,
+              messageBody: smsBody,
+              smsStatus: "failed",
+              errorMessage: smsErr instanceof Error ? smsErr.message : "Unknown error",
+              reminderType: "manual",
+            });
+          }
+        }
       }
     } catch (err: unknown) {
       emailStatus = "failed";

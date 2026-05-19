@@ -45,7 +45,7 @@ const employeeSchema = z.object({
   fullName: z.string().min(1, "Name is required"),
   role: z.string().nullable().optional(),
   email: z.string().email("Invalid email address"),
-  phone: z.string().nullable().optional(),
+  phone: z.string().regex(/^\+?[\d\s\-()]*$/, "Invalid phone number format").nullable().optional(),
   status: z.enum(["active", "inactive"]),
 });
 

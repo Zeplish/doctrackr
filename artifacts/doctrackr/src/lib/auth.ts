@@ -27,8 +27,8 @@ export function useLogin() {
       if (!res.ok) throw new Error("Invalid credentials");
       return res.json();
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["auth"] });
+    onSuccess: (_data, variables) => {
+      qc.setQueryData(["auth", "me"], { authenticated: true, username: variables.username });
     },
   });
 }

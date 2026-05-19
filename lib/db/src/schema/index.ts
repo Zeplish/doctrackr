@@ -1,5 +1,7 @@
 export * from "./organization";
 export * from "./smtp-settings";
+export * from "./sms-settings";
+export * from "./sms-logs";
 export * from "./reminder-settings";
 export * from "./students";
 export * from "./employees";

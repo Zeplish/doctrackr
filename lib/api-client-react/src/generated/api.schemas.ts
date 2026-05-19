@@ -79,6 +79,81 @@ export interface OrganizationInput {
   employeeEmailTemplate?: string | null;
 }
 
+export interface SmsSettings {
+  id: number;
+  /** @nullable */
+  accountSid?: string | null;
+  /** @nullable */
+  fromNumber?: string | null;
+  enabled: boolean;
+  authTokenSet: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SmsSettingsInput {
+  /** @nullable */
+  accountSid?: string | null;
+  /** @nullable */
+  authToken?: string | null;
+  /** @nullable */
+  fromNumber?: string | null;
+  enabled?: boolean;
+}
+
+export interface TestSmsInput {
+  toPhone: string;
+}
+
+export type SmsLogPersonType =
+  (typeof SmsLogPersonType)[keyof typeof SmsLogPersonType];
+
+export const SmsLogPersonType = {
+  student: "student",
+  employee: "employee",
+} as const;
+
+export type SmsLogSmsStatus =
+  (typeof SmsLogSmsStatus)[keyof typeof SmsLogSmsStatus];
+
+export const SmsLogSmsStatus = {
+  sent: "sent",
+  failed: "failed",
+} as const;
+
+export type SmsLogReminderType =
+  (typeof SmsLogReminderType)[keyof typeof SmsLogReminderType];
+
+export const SmsLogReminderType = {
+  automatic: "automatic",
+  manual: "manual",
+  overdue: "overdue",
+} as const;
+
+export interface SmsLog {
+  id: number;
+  recipientPhone: string;
+  personType: SmsLogPersonType;
+  personId: number;
+  personName: string;
+  checklistItemId: number;
+  documentTypeId: number;
+  documentTypeName: string;
+  messageBody: string;
+  smsStatus: SmsLogSmsStatus;
+  /** @nullable */
+  errorMessage?: string | null;
+  reminderType: SmsLogReminderType;
+  sentAt: string;
+}
+
+export interface SmsLogPage {
+  items: SmsLog[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface SmtpSettings {
   id: number;
   /** @nullable */
@@ -454,6 +529,31 @@ export interface DashboardStats {
   remindersSentThisMonth: number;
   failedEmails: number;
 }
+
+export type ListSmsLogsParams = {
+  personType?: ListSmsLogsPersonType;
+  status?: ListSmsLogsStatus;
+  page?: number;
+  limit?: number;
+};
+
+export type ListSmsLogsPersonType =
+  (typeof ListSmsLogsPersonType)[keyof typeof ListSmsLogsPersonType];
+
+export const ListSmsLogsPersonType = {
+  student: "student",
+  employee: "employee",
+  all: "all",
+} as const;
+
+export type ListSmsLogsStatus =
+  (typeof ListSmsLogsStatus)[keyof typeof ListSmsLogsStatus];
+
+export const ListSmsLogsStatus = {
+  sent: "sent",
+  failed: "failed",
+  all: "all",
+} as const;
 
 export type ListStudentsParams = {
   status?: ListStudentsStatus;

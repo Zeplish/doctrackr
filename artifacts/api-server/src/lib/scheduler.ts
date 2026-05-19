@@ -6,6 +6,7 @@ import {
   studentsTable,
   employeesTable,
   emailLogsTable,
+  smsLogsTable,
   organizationTable,
   smtpSettingsTable,
   reminderSettingsTable,
@@ -22,6 +23,12 @@ import {
   buildEmployeeReminderEmail,
   sendReminderEmail,
 } from "./email";
+import {
+  getSmsSettings,
+  sendSms,
+  buildStudentSmsBody,
+  buildEmployeeSmsBody,
+} from "./sms";
 import { logger } from "./logger";
 
 let scheduledTask: cron.ScheduledTask | null = null;
@@ -32,6 +39,7 @@ export async function runReminderJob(): Promise<void> {
   const [settings] = await db.select().from(reminderSettingsTable).limit(1);
   const [org] = await db.select().from(organizationTable).limit(1);
   const [smtp] = await db.select().from(smtpSettingsTable).limit(1);
+  const smsSettings = await getSmsSettings();
 
   if (!smtp?.host) {
     logger.warn("Skipping reminder job: SMTP not configured");
@@ -164,6 +172,46 @@ export async function runReminderJob(): Promise<void> {
           })
           .where(eq(checklistItemsTable.id, item.id));
 
+        if (smsSettings?.enabled && s.parent1Phone) {
+          const smsBody = buildStudentSmsBody({
+            orgName: org?.name ?? "DocTrackr",
+            studentName: s.fullName,
+            documentType: row.docType.name,
+            expiryDate: expiryDateFormatted,
+            status,
+          });
+          try {
+            await sendSms(s.parent1Phone, smsBody);
+            await db.insert(smsLogsTable).values({
+              recipientPhone: s.parent1Phone,
+              personType: "student",
+              personId: s.id,
+              personName: s.fullName,
+              checklistItemId: item.id,
+              documentTypeId: row.docType.id,
+              documentTypeName: row.docType.name,
+              messageBody: smsBody,
+              smsStatus: "sent",
+              reminderType,
+            });
+          } catch (smsErr) {
+            logger.error(smsErr, `Failed to send SMS for checklist item ${item.id}`);
+            await db.insert(smsLogsTable).values({
+              recipientPhone: s.parent1Phone,
+              personType: "student",
+              personId: s.id,
+              personName: s.fullName,
+              checklistItemId: item.id,
+              documentTypeId: row.docType.id,
+              documentTypeName: row.docType.name,
+              messageBody: smsBody,
+              smsStatus: "failed",
+              errorMessage: smsErr instanceof Error ? smsErr.message : "Unknown error",
+              reminderType,
+            });
+          }
+        }
+
         sent++;
       } else if (item.personType === "employee" && row.employee) {
         const e = row.employee;
@@ -211,6 +259,46 @@ export async function runReminderJob(): Promise<void> {
             updatedAt: new Date(),
           })
           .where(eq(checklistItemsTable.id, item.id));
+
+        if (smsSettings?.enabled && e.phone) {
+          const smsBody = buildEmployeeSmsBody({
+            orgName: org?.name ?? "DocTrackr",
+            employeeName: e.fullName,
+            documentType: row.docType.name,
+            expiryDate: expiryDateFormatted,
+            status,
+          });
+          try {
+            await sendSms(e.phone, smsBody);
+            await db.insert(smsLogsTable).values({
+              recipientPhone: e.phone,
+              personType: "employee",
+              personId: e.id,
+              personName: e.fullName,
+              checklistItemId: item.id,
+              documentTypeId: row.docType.id,
+              documentTypeName: row.docType.name,
+              messageBody: smsBody,
+              smsStatus: "sent",
+              reminderType,
+            });
+          } catch (smsErr) {
+            logger.error(smsErr, `Failed to send SMS for checklist item ${item.id}`);
+            await db.insert(smsLogsTable).values({
+              recipientPhone: e.phone,
+              personType: "employee",
+              personId: e.id,
+              personName: e.fullName,
+              checklistItemId: item.id,
+              documentTypeId: row.docType.id,
+              documentTypeName: row.docType.name,
+              messageBody: smsBody,
+              smsStatus: "failed",
+              errorMessage: smsErr instanceof Error ? smsErr.message : "Unknown error",
+              reminderType,
+            });
+          }
+        }
 
         sent++;
       }
