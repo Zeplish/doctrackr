@@ -20,10 +20,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MessageSquare, Send, Info } from "lucide-react";
 
 const smsSchema = z.object({
-  accountSid: z.string().min(1, "Account SID is required"),
+  accountSid: z.string().optional(),
   authToken: z.string().optional(),
-  fromNumber: z.string().min(1, "From Number is required"),
+  fromNumber: z.string().optional(),
   enabled: z.boolean(),
+}).superRefine((data, ctx) => {
+  if (data.enabled) {
+    if (!data.accountSid || data.accountSid.trim() === "") {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Account SID is required when SMS is enabled", path: ["accountSid"] });
+    }
+    if (!data.fromNumber || data.fromNumber.trim() === "") {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "From Number is required when SMS is enabled", path: ["fromNumber"] });
+    }
+  }
 });
 
 type SmsFormValues = z.infer<typeof smsSchema>;

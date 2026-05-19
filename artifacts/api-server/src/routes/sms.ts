@@ -10,8 +10,8 @@ const router = Router();
 router.get("/sms-settings", async (req, res): Promise<void> => {
   try {
     const settings = await ensureSmsSettings();
-    const { authToken: _t, ...safe } = settings;
-    res.json(safe);
+    const { authToken, ...safe } = settings;
+    res.json({ ...safe, authTokenSet: Boolean(authToken) });
   } catch (err) {
     req.log.error(err);
     res.status(500).json({ error: "Internal server error" });
@@ -53,8 +53,8 @@ router.get("/sms-logs", async (req, res): Promise<void> => {
   try {
     const parsed = ListSmsLogsQueryParams.safeParse(req.query);
     const params = parsed.success ? parsed.data : {};
-    const page = params.page ?? 1;
-    const limit = params.limit ?? 25;
+    const page = Math.max(1, params.page ?? 1);
+    const limit = Math.min(100, Math.max(1, params.limit ?? 25));
     const offset = (page - 1) * limit;
 
     let query = db.select().from(smsLogsTable).$dynamic();
